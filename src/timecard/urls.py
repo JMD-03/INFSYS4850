@@ -19,10 +19,12 @@ from django.urls import path
 from pages.views import signon_view
 from times.views import timeEntry_view
 from reports.views import reports_view
+from profiles.views import profileCreation_view
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', signon_view, name='home'),
     path('reports/', reports_view, name='reports'),
-    path('timeEntry/', timeEntry_view, name='timeEntry')
+    path('timeEntry/', timeEntry_view, name='timeEntry'),
+    path('profileCreation/', profileCreation_view, name='profileCreation')
 ]
