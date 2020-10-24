@@ -1,13 +1,12 @@
 from django.db import models
 from django.contrib.auth.models import User
-from datetime import date, time
+from datetime import datetime
 
 # Create your models here.
+
+
 class time(models.Model):
-    user = models.ForeignKey(
-        User,
-        on_delete=models.PROTECT
-    )
-    #date = models.DateField(default=date())
-    #clockIN = models.TimeField(default=dat)
+   # clockIN = models.DateTimeField(default=datetime.today())
+   # clockOUT = models.DateTimeField(default=datetime.today())
     manualEntry = models.BooleanField(default=False)
+    date = models.DateTimeField()
