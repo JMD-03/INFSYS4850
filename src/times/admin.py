@@ -1,6 +1,4 @@
 from django.contrib import admin
+from times.models import timeKeep
 
 # Register your models here.
-from .models import time
-
-admin.site.register(time)
