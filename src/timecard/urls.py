@@ -21,12 +21,14 @@ from django.conf.urls import include
 from times.views import timeEntry_view
 from reports.views import reports_view
 from profiles.views import profileCreation_view
+from pages.views import redirect_view
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('reports/', reports_view, name='reports'),
     path('timeEntry/', timeEntry_view, name='timeEntry'),
-    path('profileCreation/', profileCreation_view, name='profileCreation')
+    path('profileCreation/', profileCreation_view, name='profileCreation'),
+    path('', redirect_view, name='redirect')
 ]
 
 urlpatterns += [
