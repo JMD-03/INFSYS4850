@@ -1,0 +1,11 @@
+{% extends 'base.html' %} {% block content %}
+{%include 'navbar.html' %}
+<h1>Employee Requests Page</h1>
+<form method="post">
+  {% csrf_token %} {{form.as_p}}
+  <button type="submit">Submit Request</button>
+</form>
+
+{% if form.errors %}
+<p>Please try again. There was an error.</p>
+{% endif %} {% endblock %}
