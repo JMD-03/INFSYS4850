@@ -20,7 +20,7 @@ from django.conf.urls import include
 #from pages.views import signon_view
 from times.views import timeEntry_view
 from reports.views import reports_view
-from profiles.views import profileCreation_view
+from profiles.views import profileCreation_view, requests_view
 from pages.views import redirect_view
 
 urlpatterns = [
@@ -28,6 +28,7 @@ urlpatterns = [
     path('reports/', reports_view, name='reports'),
     path('timeEntry/', timeEntry_view, name='timeEntry'),
     path('profileCreation/', profileCreation_view, name='profileCreation'),
+    path('requests/', requests_view, name='requests'),
     path('', redirect_view, name='redirect')
 ]
 
