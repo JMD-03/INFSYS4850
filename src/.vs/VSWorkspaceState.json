@@ -1,11 +1,13 @@
 {
   "ExpandedNodes": [
     "",
+    "\\pages",
+    "\\profiles",
     "\\reports",
     "\\templates",
     "\\timecard",
     "\\times"
   ],
-  "SelectedNode": "\\times\\tests.py",
+  "SelectedNode": "\\times\\views.py",
   "PreviewInSolutionExplorer": false
 }
