@@ -14,11 +14,9 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='userAttrib',
+            name='Profile',
             fields=[
-                ('id', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, primary_key=True, serialize=False, to='auth.user')),
-                ('PTO', models.FloatField()),
-                ('Sick_Time', models.FloatField()),
+                ('user_id', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, primary_key=True, serialize=False, to='auth.user')),
             ],
         ),
     ]

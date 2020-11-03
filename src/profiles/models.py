@@ -7,7 +7,7 @@ from django.utils.timezone import datetime
 
 
 class Profile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     PTO_Hours = models.FloatField(default=0)
     Sick_Hours = models.FloatField(default=0)
     PTO_Accrual_Rate = models.FloatField(default=0)
