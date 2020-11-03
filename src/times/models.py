@@ -6,3 +6,11 @@ class timeKeep(models.Model):
 	user = models.ForeignKey(User, on_delete=models.CASCADE)
 
 	in_time = models.DateTimeField(default = timezone.now())	
+
+	out_time = models.DateTimeField(blank = True, null = True)
+
+	lunchin_time = models.DateTimeField(blank = True, null = True)
+
+	lunchout_time = models.DateTimeField(blank = True, null = True)
+
+	clocked_in = models.BooleanField(default = True)

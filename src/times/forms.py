@@ -10,4 +10,4 @@ class timeForm(forms.ModelForm):
 
     class Meta:
         model = timeKeep
-        readonly_fields = ["in_time"]
+        fields = ["in_time", "out_time", "lunchin_time", "lunchout_time", "clocked_in",]
