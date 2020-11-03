@@ -3,6 +3,5 @@ from .models import Profile, Request
 
 # Register your models here.
 
-
 admin.site.register(Profile)
 admin.site.register(Request)
