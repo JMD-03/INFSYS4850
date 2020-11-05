@@ -6,7 +6,7 @@ import datetime
 from times.models import timeKeep
 
 class timeForm(forms.ModelForm):
-    in_time = forms.DateTimeField(initial = datetime.datetime.now(), disabled = True)
+    in_time = forms.DateTimeField(initial = timezone.now, disabled = True)
 
     class Meta:
         model = timeKeep

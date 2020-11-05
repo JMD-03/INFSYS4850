@@ -13,11 +13,8 @@ def timeEntry_view(request, *args, **kwargs):
 		form = timeForm(request.POST)
 		if form.is_valid():
 			form.save()
-			messages.success(request, 'time saved!')
 			return redirect('timeEntry.html')
 	else:
 		form = timeForm()
-		messages.warning(request, "could not save time")
-
 
 	return render(request, 'timeEntry.html', {'form' : form})
