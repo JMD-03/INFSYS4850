@@ -2,7 +2,8 @@
 {%include 'navbar.html' %}
 <h1>Employee Requests Page</h1>
 <form method="post">
-  {% csrf_token %} {{form.as_p}}
+  {% csrf_token %} 
+  {{form.as_p}}
   <button type="submit">Submit Request</button>
 </form>
 {% endblock %}

@@ -27,7 +27,7 @@ def profileCreation_view(request, *args, **kwargs):
 @login_required
 def requests_view(request, *args, **kwargs):
     if request.method == 'POST':
-        form = RequestForm(request.POST)
+        form = RequestForm(request.POST, user=request.user)
         if form.is_valid():
             user = form.save(commit=False)
             user.user = request.user
@@ -35,5 +35,5 @@ def requests_view(request, *args, **kwargs):
             #Need to fix the redirect, this is just for testing
             return redirect('/admin')
     else:
-        form = RequestForm()
+        form = RequestForm(user=request.user)
     return render(request, 'requests.html', {'form': form})
