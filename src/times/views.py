@@ -13,7 +13,7 @@ def timeEntry_view(request, *args, **kwargs):
 		form = timeForm(request.POST)
 		if form.is_valid():
 			form.save()
-			return redirect('timeEntry.html')
+			return redirect('/admin')
 	else:
 		form = timeForm()
 

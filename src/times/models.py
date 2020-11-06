@@ -5,7 +5,7 @@ from django.utils import timezone
 class timeKeep(models.Model):
 	user = models.ForeignKey(User, on_delete=models.CASCADE, blank = True, null = True)
 
-	in_time = models.DateTimeField(default = timezone.now)	
+	in_time = models.DateTimeField(blank = True, null = True)	
 
 	out_time = models.DateTimeField(blank = True, null = True)
 

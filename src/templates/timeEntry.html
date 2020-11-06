@@ -1,9 +1,9 @@
 {% extends 'base.html' %}
 {% block content %}
 {%include 'navbar.html'%}
-<form method="get" action="">
+<form method="post">
     {% csrf_token %} {{form.as_p}}
-    <button typ+e="submit">Clock In</button>
+    <button type="submit">Clock In</button>
 </form>
 
 {% endblock %}
