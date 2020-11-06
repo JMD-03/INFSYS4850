@@ -1,4 +1,10 @@
-{% extends 'base.html' %} {% block content %} {% include 'navbar.html' %}
-<h1>This is the time entry page</h1>
+{% extends 'base.html' %}
+{% block content %}
+{%include 'navbar.html'%}
+<form method="post">
+    {% csrf_token %} {{form.as_p}}
+    <button type="submit">Clock In</button>
+</form>
 
 {% endblock %}
+	
