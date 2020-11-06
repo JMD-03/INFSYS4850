@@ -2,9 +2,10 @@ from django.db import models
 from django.contrib.auth.models import User
 from datetime import date, time
 from django.utils import timezone
+from datetime import datetime
+
 
 # Create your models here.
-
 
 class timeKeep(models.Model):
 	user = models.ForeignKey(User, on_delete=models.CASCADE, blank = True, null = True)
