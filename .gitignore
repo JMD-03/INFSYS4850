@@ -4,4 +4,4 @@ Scripts/
 Lib/
 .vscode/
 .vs/
-
+src/db.sqlite3
