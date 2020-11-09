@@ -2,4 +2,6 @@
 pyvenv.cfg
 Scripts/
 Lib/
+.vscode/
 .vs/
+
