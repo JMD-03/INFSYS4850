@@ -9,8 +9,8 @@ class RightsSupport(models.Model):
         managed = False  # No database table creation or deletion  \
         # operations will be performed for this model.
 
-        # default_permissions = ("view")  # disable "add", "change", "delete"
-        # # and "view" default permissions
+        default_permissions = ()  # disable "add", "change", "delete"
+        # and "view" default permissions
 
         permissions = (
             ('employee_view', 'Global Employee View'),
