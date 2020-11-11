@@ -56,6 +56,8 @@ class RequestForm(forms.ModelForm):
         start_date = cleaned_data.get("start_Date_Time")
         end_date = cleaned_data.get("end_Date_Time")
         reqType = cleaned_data.get("request_Type")
+
+        #Along with this need to add that PTO/Sick request should not be for a prior date
         if end_date < start_date:
             raise forms.ValidationError("End date should be greater than start date.")
         # if end_time < start_time:
