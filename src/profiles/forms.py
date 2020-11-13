@@ -48,22 +48,16 @@ class RequestForm(forms.ModelForm):
     class Meta:
         widgets = {'start_Date_Time': DateTimeInput(format='%Y-%m-%d %H:%M'),
                    'end_Date_Time':   DateTimeInput(format='%Y-%m-%d %H:%M')}
-        # widgets = {'start_Date': DateInput(),
-        #            'end_Date':   DateInput(),
-        #            'start_Time': TimeInput(format='%H:%M'),
-        #            'end_Time': TimeInput(format='%H:%M')}
         model = Request
-        # fields = ("request_Type", "start_Date",
-        #           "end_Date", "start_Time", "end_Time")
         fields = ('request_Type','start_Date_Time','end_Date_Time')
 
     def clean(self):
         cleaned_data = super().clean()
         start_date = cleaned_data.get("start_Date_Time")
         end_date = cleaned_data.get("end_Date_Time")
-        # start_time = cleaned_data.get("start_Time")
-        # end_time = cleaned_data.get("end_Time")
         reqType = cleaned_data.get("request_Type")
+
+        #Along with this need to add that PTO/Sick request should not be for a prior date
         if end_date < start_date:
             raise forms.ValidationError("End date should be greater than start date.")
         # if end_time < start_time:
@@ -77,5 +71,4 @@ class RequestForm(forms.ModelForm):
             #calc_req = end_time - start_time
             #if pto_amount < calc_req:
             #    raise forms.ValidationError("You do not have enough PTO to cover this request.")
-
 

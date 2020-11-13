@@ -8,14 +8,19 @@ from datetime import datetime
 # Create your models here.
 
 class timeKeep(models.Model):
-	user = models.ForeignKey(User, on_delete=models.CASCADE, blank = True, null = True)
+	user = models.ForeignKey(User, on_delete=models.CASCADE)
 
 	in_time = models.DateTimeField(blank = True, null = True)	
-
-	out_time = models.DateTimeField(blank = True, null = True)
-
+	
 	lunchin_time = models.DateTimeField(blank = True, null = True)
 
 	lunchout_time = models.DateTimeField(blank = True, null = True)
 
-	clocked_in = models.BooleanField(default = True)
+	out_time = models.DateTimeField(blank = True, null = True)
+
+	clocked_in = models.BooleanField(default = False)
+
+	def __str__(self):
+		return str(self.user)
+	
+
