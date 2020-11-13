@@ -1,8 +1,16 @@
 {% extends 'base.html' %} {% block content %}
 {%include 'navbar.html' %}
+<<<<<<< HEAD
 <h1 >Employee Requests Page</h1>
 <form style="float:initial;" method="post">
   {% csrf_token %} {{form.as_p}}
   <button style="background-color: dodgerblue; color: white;" type="submit">Submit Request</button>
+=======
+<h1>Employee Requests Page</h1>
+<form method="post">
+  {% csrf_token %} 
+  {{form.as_p}}
+  <button type="submit">Submit Request</button>
+>>>>>>> Sahil
 </form>
 {% endblock %}
