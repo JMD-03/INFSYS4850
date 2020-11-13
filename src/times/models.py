@@ -18,7 +18,9 @@ class timeKeep(models.Model):
 
 	out_time = models.DateTimeField(blank = True, null = True)
 
-	clocked_in = models.BooleanField(default = True)
+	clocked_in = models.BooleanField(default = False)
 
 	def __str__(self):
 		return str(self.user)
+	
+

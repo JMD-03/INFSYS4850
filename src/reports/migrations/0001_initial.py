@@ -15,14 +15,20 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='timeKeep',
+            name='RightsSupport',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('in_time', models.DateTimeField(blank=True, null=True)),
-                ('lunchin_time', models.DateTimeField(blank=True, null=True)),
-                ('lunchout_time', models.DateTimeField(blank=True, null=True)),
-                ('out_time', models.DateTimeField(blank=True, null=True)),
-                ('clocked_in', models.BooleanField(default=True)),
+            ],
+            options={
+                'permissions': (('employee_view', 'Global Employee View'), ('supervisor_view', 'Global supervisor view'), ('management_view', 'Global management view')),
+                'managed': False,
+                'default_permissions': (),
+            },
+        ),
+        migrations.CreateModel(
+            name='reportModel',
+            fields=[
+                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
             ],
         ),
