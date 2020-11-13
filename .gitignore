@@ -1,6 +1,9 @@
-# created by virtualenv automatically
+#created by virtualenv automatically
 pyvenv.cfg
 Scripts/
 Lib/
 .vscode/
+.vs/
+src/db.sqlite3
 src/mydatabase
+

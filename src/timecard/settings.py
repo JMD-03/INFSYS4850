@@ -68,6 +68,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                "django.template.context_processors.request",
             ],
         },
     },
@@ -81,8 +82,12 @@ WSGI_APPLICATION = 'timecard.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': 'mydatabase',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'djangoproject',
+        'USER': 'dbadminTEST',
+        'PASSWORD': 'dbadminTEST',
+        'HOST': 'localhost',
+        'PORT': '3306'
     }
 }
 
@@ -125,4 +130,4 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-LOGIN_REDIRECT_URL = '/'
+LOGIN_REDIRECT_URL = 'timeEntry'

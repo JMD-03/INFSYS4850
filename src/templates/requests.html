@@ -5,7 +5,4 @@
   {% csrf_token %} {{form.as_p}}
   <button style="background-color: dodgerblue; color: white;" type="submit">Submit Request</button>
 </form>
-
-{% if form.errors %}
-<p>Please try again. There was an error.</p>
-{% endif %} {% endblock %}
+{% endblock %}

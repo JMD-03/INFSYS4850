@@ -1,4 +1,12 @@
-{% extends 'base.html' %} {% block content %} {% include 'navbar.html' %}
-<h1>This is the time entry page</h1>
+{% extends 'base.html' %}
+{% block content %}
+{%include 'navbar.html'%}
+<form method="post">
+    {% csrf_token %} {{form.as_p}}
+    <button type="submit" name="manual">Manual Clock In/Out</button>
+    <button type="submit" name="autoIn">Auto Clock In</button>
+    <button type="submit" name="autoOut">Auto Clock Out</button>
+</form>
 
 {% endblock %}
+	

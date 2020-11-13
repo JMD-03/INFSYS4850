@@ -7,7 +7,7 @@ from django.utils.timezone import datetime
 
 
 class Profile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     PTO_Hours = models.FloatField(default=0)
     Sick_Hours = models.FloatField(default=0)
     PTO_Accrual_Rate = models.FloatField(default=0)
@@ -30,10 +30,12 @@ class Request(models.Model):
         choices=Request_Type.choices,
         default=Request_Type.Paid_Time_Off
     )
-    start_Date = models.DateField(default=None)
-    end_Date = models.DateField(default=None)
-    start_Time = models.TimeField(default=None)
-    end_Time = models.TimeField(default=None)
+    # start_Date = models.DateField(default=None)
+    # end_Date = models.DateField(default=None)
+    # start_Time = models.TimeField(default=None)
+    # end_Time = models.TimeField(default=None)
+    start_Date_Time = models.DateTimeField(default=None)
+    end_Date_Time = models.DateTimeField(default=None)
 
     class cur_Status(models.TextChoices):
         requested = 'Requested'
@@ -44,3 +46,6 @@ class Request(models.Model):
         choices=cur_Status.choices,
         default=cur_Status.requested
     )
+
+    def __str__(self):
+        return self.user.first_name + " " + self.request_Type
