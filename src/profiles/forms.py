@@ -72,4 +72,3 @@ class RequestForm(forms.ModelForm):
             #if pto_amount < calc_req:
             #    raise forms.ValidationError("You do not have enough PTO to cover this request.")
 
-
