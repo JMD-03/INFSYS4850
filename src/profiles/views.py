@@ -33,7 +33,7 @@ def requests_view(request, *args, **kwargs):
             user.user = request.user
             form.save()
             #Need to fix the redirect, this is just for testing
-            return redirect('/admin')
+            return redirect('/requests')
     else:
         form = RequestForm(user=request.user)
     return render(request, 'requests.html', {'form': form})

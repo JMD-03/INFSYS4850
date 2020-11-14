@@ -13,11 +13,11 @@ class ReportForm(forms.Form):
         (1, ("Web-Based Report")),
         (2, ("Downloadable Report"))
     )
-    time_Frame = forms.ChoiceField(choices=times, required=True)
-    employee = [("All", "All Employees")]
-    employee += [(i, i) for i in Profile.objects.all()]
-    employee_Choice = forms.ChoiceField(choices=employee, required=True)
-    report_Type = forms.ChoiceField(choices=reports, required=True)
+    # time_Frame = forms.ChoiceField(choices=times, required=True)
+    # # employee = [("All", "All Employees")]
+    # # employee += [(i, i) for i in Profile.objects.all()]
+    # employee_Choice = forms.ChoiceField(choices=employee, required=True)
+    # report_Type = forms.ChoiceField(choices=reports, required=True)
 
 
     class Meta:
