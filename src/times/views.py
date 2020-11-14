@@ -3,7 +3,7 @@ from times.models import timeKeep
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from datetime import datetime
+import datetime
 
 # core logic
 
@@ -14,11 +14,11 @@ def timeEntry_view(request, *args, **kwargs):
 		if form.is_valid():
 			user = form.save()
 			if 'autoIn' in request.POST:
-				date = datetime.now()
+				date = datetime.datetime.now()
 				user.in_time = date.strftime('%Y-%m-%d %H:%M')
 				user.clocked_in = True
 			if 'autoOut' in request.POST:
-				date = datetime.now()
+				date = datetime.datetime.now()
 				user.out_time = date.strftime('%Y-%m-%d %H:%M')
 				user.clocked_out = False
 			user.user = request.user
