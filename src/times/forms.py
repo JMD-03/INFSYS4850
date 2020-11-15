@@ -17,7 +17,7 @@ class timeForm(forms.ModelForm):
                    'lunchout_time': DateTimeInput(format='%Y-%m-%d %H:%M'),
                    'out_time': DateTimeInput(format='%Y-%m-%d %H:%M')}
         model = timeKeep
-        fields = [ "in_time", "lunchin_time", "lunchout_time", "out_time", "clocked_in",]
+        fields = ["user", "in_time", "lunchin_time", "lunchout_time", "out_time", "clocked_in",]
 
         #model function for manual time incase user goes out of bounds
     def clean(self):

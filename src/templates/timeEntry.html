@@ -3,8 +3,10 @@
 {%include 'navbar.html'%}
 <form method="post">
     {% csrf_token %} {{form.as_p}}
-    <button type="submit" name="manual">Manual Clock In/Out</button>
+    <button id="manual_submit_button" type="submit" name="manual">Manual Clock In/Out</button>
     <button type="submit" name="autoIn">Auto Clock In</button>
+    <button type="submit" name="lunchIn">Auto Lunch Clock In</button>
+    <button type="submit" name="lunchOut">Auto Lunch Clock Out</button>
     <button type="submit" name="autoOut">Auto Clock Out</button>
 </form>
 

@@ -9,21 +9,31 @@ import datetime
 
 @login_required
 def timeEntry_view(request, *args, **kwargs):	
+	try:
+		current = timeKeep.objects.filter(user = request.user).get(currentDate = datetime.date.today())
+	except timeKeep.DoesNotExist:
+		current = timeKeep.objects.create(user = request.user, currentDate = datetime.date.today())
 	if request.method == 'POST':
-		form = timeForm(request.POST)
-		if form.is_valid():
-			user = form.save()
-			if 'autoIn' in request.POST:
-				date = datetime.datetime.now()
-				user.in_time = date.strftime('%Y-%m-%d %H:%M')
-				user.clocked_in = True
-			if 'autoOut' in request.POST:
-				date = datetime.datetime.now()
-				user.out_time = date.strftime('%Y-%m-%d %H:%M')
-				user.clocked_out = False
-			user.user = request.user
-			user.save()
-			return redirect('/admin')
+		if 'autoIn' in request.POST:
+			date = datetime.datetime.now()
+			current.in_time = date
+			current.clocked_in = True
+			#print("autoin")
+		if 'lunchIn' in request.POST:
+			date = datetime.datetime.now()
+			current.lunchin_time = date
+			current.clocked_in = False
+		if 'lunchOut' in request.POST:
+			date = datetime.datetime.now()
+			current.lunchout_time = date
+			current.clocked_in = True
+		if 'autoOut' in request.POST:
+			date = datetime.datetime.now()
+			current.out_time = date
+			current.clocked_in = False
+			#print("autoout")
+		current.save()
+		return redirect('/admin')
 	else:
-		form = timeForm()
+		form = timeForm(instance = current)
 	return render(request, 'timeEntry.html', {'form' : form})
