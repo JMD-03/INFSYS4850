@@ -1,8 +1,12 @@
+<head>
+  <title>Employee Creation Page</title>
+</head>
 {% extends 'base.html' %} {% block content %} {% include 'navbar.html' %}
 
 <h2>Create User</h2>
 <form method="post">
-{% csrf_token %} {{ form1.as_table}} {{ form2.as_p }}
+  {% csrf_token %}
+  {{ form1.as_table }} {{ form2.as_table }}
   <button type="submit">Create User</button>
 </form>
 

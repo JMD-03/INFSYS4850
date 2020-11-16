@@ -1,6 +1,7 @@
 from django.db import models
-from django.contrib.auth.models import User
+
 # Create your models here.
+
 class RightsSupport(models.Model):
 
     class Meta:
@@ -16,4 +17,3 @@ class RightsSupport(models.Model):
             ('supervisor_view', 'Global supervisor view'),
             ('management_view', 'Global management view'),
         )
-
