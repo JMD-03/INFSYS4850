@@ -2,11 +2,8 @@
 {%include 'navbar.html' %}
 <h1>Employee Requests Page</h1>
 <form style="float:initial;" method="post">
-  {% csrf_token %} {{form.as_p}}
+  {% csrf_token %}  {{form.as_p}}
   <button style="background-color: dodgerblue; color: white;" type="submit">Submit Request</button>
 </form>
-
-<p> <b>Please Note:</b> If you are submitting a request spanning multiple days you should not enter a start and end time. These will be ignored and a full 8 hours will be charged per day.</p>
-<p> If you need to take 1&1/2 days please use two requests. One for the first full day, and a second for the half day. Thank you. </p>
 
 {% endblock %}

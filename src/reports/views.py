@@ -4,7 +4,7 @@ from .forms import ReportForm
 
 # Create your views here.
 @login_required
-@permission_required("reports.supervisor_view")
+@permission_required("pages.supervisor_view")
 def reports_view(request, *args, **kwargs):
     if request.method == 'POST':
         form = ReportForm(request.POST)

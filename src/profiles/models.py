@@ -19,7 +19,7 @@ class Profile(models.Model):
 
 class Request(models.Model):
     id = models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')
-    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
 
     class Request_Type(models.TextChoices):
         Paid_Time_Off = 'Paid Time Off Request'
@@ -31,12 +31,9 @@ class Request(models.Model):
         choices=Request_Type.choices,
         default=Request_Type.Paid_Time_Off
     )
-    start_Date = models.DateField(default=None, blank=False)
-    end_Date = models.DateField(default=None, blank=False)
-    start_Time = models.TimeField(default=None, blank=True)
-    end_Time = models.TimeField(default=None, blank=True)
-    # start_Date_Time = models.DateTimeField(default=None)
-    # end_Date_Time = models.DateTimeField(default=None)
+
+    start_Date_Time = models.DateTimeField(default=None)
+    end_Date_Time = models.DateTimeField(default=None)
 
     class cur_Status(models.TextChoices):
         requested = 'Requested'
@@ -47,6 +44,3 @@ class Request(models.Model):
         choices=cur_Status.choices,
         default=cur_Status.requested
     )
-
-    def __str__(self):
-        return self.user.first_name + " " + self.request_Type
