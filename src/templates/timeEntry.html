@@ -8,7 +8,7 @@
     <button type="submit" name="autoIn">Auto Clock In</button>
     {% elif form.clocked_in.value == True and form.in_time.value != None and form.lunchin_time.value == None%}
     <button type="submit" name="lunchIn">Auto lunch Clock In</button>
-    {% elif not form.clocked_in.value == True and form.lunchin_time.value != None %}
+    {% elif not form.clocked_in.value == True and form.lunchin_time.value != None and form.lunchout_time.value == None %}
     <button type="submit" name="lunchOut">Auto lunch Clock Out</button>
     {% elif form.clocked_in.value == True and form.lunchout_time.value != None and form.out_time.value == None %}
     <button type="submit" name="autoOut">Auto Clock Out</button>

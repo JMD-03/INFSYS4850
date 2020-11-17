@@ -56,7 +56,7 @@ def timeEntry_view(request, *args, **kwargs):
 					current.clocked_in = False
 					#print("autoout")
 				current.save()
-		return redirect('/admin')
+		return redirect('/timeEntry')
 	else:
 		if current:
 			form = timeForm(instance = current)
