@@ -1,4 +1,13 @@
 {% extends "base.html" %} {% block content %}
-<p>Logged out successfully!</p>
-<a href="{% url 'login'%}">Click here to login again.</a>
+<head>
+<style>
+.logout {
+    font-size: 20px;
+}
+</style>
+</head>
+<div class="logout">
+<p style="text-align: center;">Logged out successfully!</p>
+<p style="text-align: center;"><a href="{% url 'login'%}">Click here to login again.</a></p>
+</div>
 {% endblock %}
