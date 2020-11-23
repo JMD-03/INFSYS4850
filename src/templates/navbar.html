@@ -21,9 +21,7 @@
             border: hidden;
             width: auto;
             font-size: 20px;
-            text-align: center;
-            
-            "
+            text-align: center;"
           >
             <a class="navbar-brand" href="{%url 'timeEntry' %}">
 
@@ -56,9 +54,9 @@
           
             <!--Insert the file name of your brand image below after the 'img'-->
           </a>
-          <button type="button"><span class="icon-bar"
+          {% comment %} <button type="button"><span class="icon-bar"
               ><a href="{% url 'logout' %}">Logout</a></span
-            ></button>
+            ></button> {% endcomment %}
         </div>
 
         <!--    Below is probably just extra from what I initially imported out of github     -->
