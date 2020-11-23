@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% block content %}
+{%include 'navbar.html'%}
+<form method="post">
+    {% csrf_token %} {{form.as_p}}
+    {% if onlyuser %}
+    <button type="submit" name = "userSub">submit</button>
+    {% else %}
+
+    {{ userformset.management_form }}
+    <table>
+    <thead>
+    <tr>
+        {% for form in userformset %}
+        <th>
+            <p>
+                {{ forloop.counter0 }}
+            </p>
+            <p>
+                {{ form.currentDate.value }}
+            </p>
+        </th>
+        {% endfor %}
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        {% for form in userformset %}
+        <td>
+        {{ form.as_p }}
+        </td>
+        {% endfor %}
+    </tr>
+    </tbody>
+    </table>
+
+
+    <button type="submit" name="left">"<---"</button>
+    <button type="submit" name="right">"--->"</button>
+    <button type="submit" name="submit">submit</button>
+    {% endif %}
+</form>
+ {% endblock %}

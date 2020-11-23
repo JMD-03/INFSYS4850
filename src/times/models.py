@@ -31,9 +31,9 @@ class timeKeep(models.Model):
 	out_time = models.DateTimeField(blank = True, null = True)
 
 	clocked_in = models.BooleanField(default = False)
+	
+	#is_Manual = models.BooleanField(default = False)
 
 	currentDate = models.DateField(default = timezone.now)
 	class Meta:
 		constraints = [models.UniqueConstraint(fields=['user', 'currentDate'], name='unique user date')]
-	
-

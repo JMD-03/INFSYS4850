@@ -7,5 +7,11 @@ from times.models import timeKeep
 class timesAdmin(admin.ModelAdmin):
     list_display = ['user', 'in_time', 'out_time']
     list_per_page = 10
-
+    readonly_fields = ["user","currentDate", "clocked_in"]
+    def has_add_permission(self, request, obj=None):
+        return False
+    def has_change_permission(self, request, obj=None):
+        return True
+    def has_delete_permission(self, request, obj=None):
+        return True
 admin.site.register(timeKeep, timesAdmin)
