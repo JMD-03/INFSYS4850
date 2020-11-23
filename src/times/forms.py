@@ -31,7 +31,7 @@ class timeForm(forms.ModelForm):
         time_right_now = datetime.datetime.now().replace(tzinfo=None)
         if out_Time:
             if (out_Time.replace(tzinfo=None) - time_right_now).days > 7:
-                raise form.ValidationError(
+                raise forms.ValidationError(
                     "you must clock in within the week.")
             if lunchout_Time and out_Time < lunchout_Time:
                 raise forms.ValidationError(

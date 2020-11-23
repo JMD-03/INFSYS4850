@@ -2,11 +2,13 @@ from django.contrib.auth import login, authenticate
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from .forms import UserForm, ProfileForm, RequestForm
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, permission_required
+from .models import Profile
 
 # Create your views here.
 
 @login_required
+@permission_required("pages.supervisor_view")
 def profileCreation_view(request, *args, **kwargs):
     if request.method == 'POST':
         form1 = UserForm(request.POST)
@@ -37,3 +39,5 @@ def requests_view(request, *args, **kwargs):
     else:
         form = RequestForm(user=request.user)
     return render(request, 'requests.html', {'form': form})
+
+
