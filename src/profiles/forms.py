@@ -19,7 +19,6 @@ class UserForm(UserCreationForm):
         fields = ("first_name", "last_name", "username",
                   "email", "password1", "password2")
 
-
 class ProfileForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
@@ -209,7 +208,7 @@ class RequestForm(forms.ModelForm):
                 print(day)
                 if (day.weekday() < 5):
                     if (minutes/60) > 8:                                       
-                        raise forms.ValidationError("You can not request over 8 hours of PTO for a single day.")
+                        raise forms.ValidationError("You can not request over 8 hours of sick time for a single day.")
                     if (minutes + remain_time < 60):
                         raise forms.ValidationError("Minimum request time is one hour.")
                     if (sick < minutes):                                         

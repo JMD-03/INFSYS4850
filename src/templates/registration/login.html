@@ -8,10 +8,16 @@
 {% else %}
 <p>Please login to see this page.</p>
 {% endif %} {% endif %}
-
+<head>
+  <style>
+    .login {
+      text-align: center;
+    }
+  </style>
+</head>
 <form method="post" action="{% url 'login' %}">
   {% csrf_token %}
-  <table>
+  <table class="login" align="center">
     <tr>
       <td>{{ form.username.label_tag }}</td>
       <td>{{ form.username }}</td>
@@ -21,8 +27,10 @@
       <td>{{ form.password }}</td>
     </tr>
   </table>
+  <div style="margin-left: 54.3%;">
   <input type="submit" value="login" />
   <input type="hidden" name="next" value="{{ next }}" />
+  </div>
 </form>
 
 <!--  Assumes you setup the password_reset view in your URLconf 

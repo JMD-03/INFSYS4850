@@ -20,7 +20,7 @@ from django.contrib.auth import urls
 
 #from pages.views import signon_view
 from times.views import timeEntry_view, timeEdit_view
-from reports.views import reports_view
+from reports.views import reports_view, reports_webview
 from profiles.views import profileCreation_view, requests_view
 from pages.views import redirect_login
 
@@ -31,6 +31,7 @@ urlpatterns = [
     path('profileCreation/', profileCreation_view, name='profileCreation'),
     path('requests/', requests_view, name='requests'),
     path('timeEdit/', timeEdit_view,name='timeEdit'),
+    path('reports_webview/', reports_webview,name='reports_webview'),
     path('', redirect_login, name='redirect')
 ]
 

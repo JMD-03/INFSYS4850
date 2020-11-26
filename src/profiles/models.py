@@ -87,16 +87,16 @@ class Profile(models.Model):
         super(Profile, self).save(*args, **kwargs)
 
 # This deletes the user if the profile is deleted.
-def delete_user(sender, instance=None, **kwargs):
-    try:
-        instance.user
-        print(instance.user)
-    except User.DoesNotExist:
-        pass
-    else:
-        instance.user.delete()
-        print(instance.user)
-signals.post_delete.connect(delete_user, sender=Profile)
+# def delete_user(sender, instance=None, **kwargs):
+#     try:
+#         instance.user
+#         print(instance.user)
+#     except User.DoesNotExist:
+#         pass
+#     else:
+#         instance.user.delete()
+#         print(instance.user)
+# signals.post_delete.connect(delete_user, sender=Profile)
 
 
 
