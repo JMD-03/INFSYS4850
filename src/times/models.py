@@ -1,26 +1,38 @@
 from django.db import models
 from django.contrib.auth.models import User
 from datetime import date, time
+import datetime
 from django.utils import timezone
-from datetime import datetime
 
 
 # Create your models here.
 
 class timeKeep(models.Model):
-	user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
 
-	in_time = models.DateTimeField(blank = True, null = True)	
-	
-	lunchin_time = models.DateTimeField(blank = True, null = True)
+    class timeType(models.TextChoices):
+        Paid_Time_Off = 'Paid Time Off'
+        Sick_Day = 'Sick Time'
+        Overtime = 'Overtime'
+        Standardtime = 'Standard Time'
 
-	lunchout_time = models.DateTimeField(blank = True, null = True)
+    timeType = models.TextField(
+        choices=timeType.choices,
+        default=timeType.Standardtime
+    )
 
-	out_time = models.DateTimeField(blank = True, null = True)
+    in_time = models.DateTimeField(blank=True, null=True)
 
-	clocked_in = models.BooleanField(default = False)
+    lunchin_time = models.DateTimeField(blank=True, null=True)
 
-	def __str__(self):
-		return str(self.user)
-	
+    lunchout_time = models.DateTimeField(blank=True, null=True)
 
+    out_time = models.DateTimeField(blank=True, null=True)
+
+    clocked_in = models.BooleanField(default=False)
+
+    currentDate = models.DateField(default=timezone.now)
+
+    class Meta:
+        constraints = [models.UniqueConstraint(
+            fields=['user', 'currentDate'], name='unique user date')]
