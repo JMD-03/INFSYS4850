@@ -5,9 +5,19 @@
 
 <h2>Create User</h2>
 <form method="post">
+  <table>
+    {{ form1.as_table }}
+    <tr>
+      <td>&nbsp;</td>
+    </tr>
+    {{ form2.as_table }}
+    <tr>
+      <td>&nbsp;</td>
+    </tr>
+    </table>
+    
   {% csrf_token %}
-  {{ form1.as_table }} {{ form2.as_table }}
-  <button type="submit">Create User</button>
+  <button style="background: dodgerblue; color: white;" type="submit">Create User</button>
 </form>
 
 {% endblock content %}
