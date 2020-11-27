@@ -18,7 +18,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterField(
             model_name='timekeep',
-            name='currentDate',
+            name='dateTimeEntered',
             field=models.DateField(default=django.utils.timezone.now),
         ),
     ]

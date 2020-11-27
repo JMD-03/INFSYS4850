@@ -34,6 +34,6 @@ class timeKeep(models.Model):
 	
 	#is_Manual = models.BooleanField(default = False)
 
-	currentDate = models.DateField(default = timezone.now)
+	dateTimeEntered = models.DateField(default = timezone.now)
 	class Meta:
-		constraints = [models.UniqueConstraint(fields=['user', 'currentDate'], name='unique user date')]
+		constraints = [models.UniqueConstraint(fields=['user', 'dateTimeEntered'], name='unique user date')]

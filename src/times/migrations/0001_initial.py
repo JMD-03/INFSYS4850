@@ -25,12 +25,12 @@ class Migration(migrations.Migration):
                 ('lunchout_time', models.DateTimeField(blank=True, null=True)),
                 ('out_time', models.DateTimeField(blank=True, null=True)),
                 ('clocked_in', models.BooleanField(default=False)),
-                ('currentDate', models.DateField(default=datetime.date.today)),
+                ('dateTimeEntered', models.DateField(default=datetime.date.today)),
                 ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
             ],
         ),
         migrations.AddConstraint(
             model_name='timekeep',
-            constraint=models.UniqueConstraint(fields=('user', 'currentDate'), name='unique user date'),
+            constraint=models.UniqueConstraint(fields=('user', 'dateTimeEntered'), name='unique user date'),
         ),
     ]
