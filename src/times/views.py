@@ -94,37 +94,4 @@ def getTimeKeepFromKeys(user, date, create = False):
 @login_required
 @permission_required("reports.supervisor_view", "reports.management_view")
 def timeEdit_view(request, *args, **kwargs):
-	global formsetInitParams
-	if 'user' not in request.POST:
-		if 'weeklyTimeSubmit' in request.POST:
-			currentDayForms = timeEditFormSet(request.POST, initial = formsetInitParams)
-			#for form in currentDayForms:
-				#if form.has_changed():
-					#timeKeep = form.save(commit = False)
-					#dateTimeEntered = form.cleaned_data_['dateTimeEntered']
-					#timeKeep.in_time += dateTimeEntered
-			if currentDayForms.has_changed() and currentDayForms.is_valid():
-				currentDayForms.save()
-			return render(request, 'timeEdit.html', {'userformset': currentDayForms})
-		else:
-			userform = UserForm()
-			return render(request, 'timeEdit.html', {'form': userform, 'onlyuser': True})
-
-	else:
-		userform = UserForm(request.POST)
-		if not userform.is_valid():
-			return render(request, 'timeEdit.html', {'form': UserForm(), 'onlyuser': True})
-		user = userform.cleaned_data['user']
-		year = datetime.datetime.now().isocalendar().year
-		weekNumberToday = datetime.datetime.now().isocalendar().week
-		datesToDisplay = [datetime.datetime.strptime(f'{year}-W{weekNumberToday - 1}-{i}', "%Y-W%W-%w") for i in range (1,6)]
-		formsetInitParams = []
-		for date in datesToDisplay:
-			param = None
-			if getTimeKeepFromKeys(user, date, False) == None:
-				param = {'user': user, 'dateTimeEntered': date.date()}
-			else:
-				param =  model_to_dict(getTimeKeepFromKeys(user, date, False))
-			formsetInitParams.append(param)
-		currentDayForms = timeEditFormSet(initial=formsetInitParams, queryset = timeKeep.objects.none())
-		return render(request, 'timeEdit.html', {'userformset': currentDayForms})
+	return render(request, 'timeEdit.html')
