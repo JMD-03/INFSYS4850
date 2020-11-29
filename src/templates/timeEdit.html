@@ -3,16 +3,41 @@
 {%include 'navbar.html'%}
 <form method="post">
     {% csrf_token %} {{form.as_p}}
-    <button type="submit" name="manual">Manual Clock In/Out</button>
-    {% if not form.clocked_in.value and form.in_time.value == None %} 
-    <button type="submit" name="autoIn">Auto Clock In</button>
-    {% elif form.clocked_in.value == True and form.in_time.value != None and form.lunchin_time.value == None%}
-    <button type="submit" name="lunchIn">Auto lunch Clock In</button>
-    {% elif not form.clocked_in.value == True and form.lunchin_time.value != None and form.lunchout_time.value == None %}
-    <button type="submit" name="lunchOut">Auto lunch Clock Out</button>
-    {% elif form.clocked_in.value == True and form.lunchout_time.value != None and form.out_time.value == None %}
-    <button type="submit" name="autoOut">Auto Clock Out</button>
+    {% if onlyuser %}
+    <button type="submit" name = "userSub">submit</button>
+    {% else %}
+
+    {{ userformset.management_form }}
+    <table>
+    <thead>
+    <tr>
+        {% for form in userformset %}
+        <th>
+            <p>
+                {{ forloop.counter0 }}
+            </p>
+            <p>
+                {{ form.dateTimeEntered.value }}
+            </p>
+        </th>
+        {% endfor %}
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        {% for form in userformset %}
+        <td>
+        {{ form.as_p }}
+        </td>
+        {% endfor %}
+    </tr>
+    </tbody>
+    </table>
+
+
+    <button type="submit" name="left">"<---"</button>
+    <button type="submit" name="right">"--->"</button>
+    <button type="submit" name="weeklyTimeSubmit">submit</button>
     {% endif %}
 </form>
-
  {% endblock %}
