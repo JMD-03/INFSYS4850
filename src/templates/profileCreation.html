@@ -5,16 +5,8 @@
 
 <h2>Create User</h2>
 <form method="post">
-  <table>
-    {{ form1.as_table }}
-    <tr>
-      <td>&nbsp;</td>
-    </tr>
-    {{ form2.as_table }}
-    <tr>
-      <td>&nbsp;</td>
-    </tr>
-    </table>
+  {{ form1.as_p }}
+  {{ form2.as_p }}
     
   {% csrf_token %}
   <button style="background: dodgerblue; color: white;" type="submit">Create User</button>
