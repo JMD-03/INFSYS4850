@@ -6,6 +6,7 @@ from django.contrib.auth.decorators import login_required, permission_required
 from django.shortcuts import render, redirect
 from django.utils import timezone
 from django.forms.widgets import TextInput
+from django.db import connection
 import datetime
 
 # core logic
@@ -25,28 +26,28 @@ def timeEntry_view(request, *args, **kwargs):
 					in_time = currentReqForm.cleaned_data['in_time']
 					inCurrent = getTimeKeepFromKeys(request.user, in_time, True)
 					inCurrent.in_time = in_time
-					inCurrent.dateTimeEntered = in_time
+					inCurrent.dateTimeEntered = in_time.date()
 					inCurrent.clocked_in = True
 					inCurrent.save()
 				if 'lunchin_time' in currentReqForm.changed_data:
 					lunchin_time = currentReqForm.cleaned_data['lunchin_time']
 					inCurrent = getTimeKeepFromKeys(request.user, lunchin_time, True)
 					inCurrent.lunchin_time = lunchin_time
-					inCurrent.dateTimeEntered = lunchin_time
+					inCurrent.dateTimeEntered = lunchin_time.date()
 					inCurrent.clocked_in = False
 					inCurrent.save()
 				if 'lunchout_time' in currentReqForm.changed_data:
 					lunchout_time = currentReqForm.cleaned_data['lunchout_time']
 					inCurrent = getTimeKeepFromKeys(request.user, lunchout_time, True)
 					inCurrent.lunchout_time = lunchout_time
-					inCurrent.dateTimeEntered = lunchout_time
+					inCurrent.dateTimeEntered = lunchout_time.date()
 					inCurrent.clocked_in = True
 					inCurrent.save()
 				if 'out_time' in currentReqForm.changed_data:
 					out_time = currentReqForm.cleaned_data['out_time']
 					inCurrent = getTimeKeepFromKeys(request.user, out_time, True)
 					inCurrent.out_time = out_time
-					inCurrent.dateTimeEntered = out_time
+					inCurrent.dateTimeEntered = out_time.date()
 					inCurrent.clocked_in = False
 					inCurrent.save()
 		else:
@@ -83,10 +84,10 @@ def timeEntry_view(request, *args, **kwargs):
 
 def getTimeKeepFromKeys(user, date, create = False):
 	try:
-		return timeKeep.objects.filter(user = user).get(dateTimeEntered = date)
+		return timeKeep.objects.filter(user = user).get(dateTimeEntered = date.date())
 	except timeKeep.DoesNotExist:
 		if create:
-			return timeKeep.objects.create(user = user, dateTimeEntered = date)
+			return timeKeep.objects.create(user = user, dateTimeEntered = date.date())
 		else:
 			return None
 	return None
@@ -115,16 +116,19 @@ def timeEdit_view(request, *args, **kwargs):
 		if not userform.is_valid():
 			return render(request, 'timeEdit.html', {'form': UserForm(), 'onlyuser': True})
 		user = userform.cleaned_data['user']
-		year = datetime.datetime.now().isocalendar().year
-		weekNumberToday = datetime.datetime.now().isocalendar().week
-		datesToDisplay = [datetime.datetime.strptime(f'{year}-W{weekNumberToday - 1}-{i}', "%Y-W%W-%w") for i in range (1,6)]
+		year = timezone.now().isocalendar().year
+		weekNumberToday = timezone.now().isocalendar().week
+		datesToDisplay = [datetime.datetime.strptime(f'{year}-W{weekNumberToday - 1}-{i}', "%Y-W%W-%w").replace(tzinfo=datetime.timezone.utc) for i in range (1,6)]
 		formsetInitParams = []
 		for date in datesToDisplay:
 			param = None
 			if getTimeKeepFromKeys(user, date, False) == None:
-				param = {'user': user, 'dateTimeEntered': date.date()}
+				param = {'user': user, 'dateTimeEntered': date.replace(tzinfo=timezone.utc).date()}
 			else:
-				param =  model_to_dict(getTimeKeepFromKeys(user, date, False))
+				param =  model_to_dict(getTimeKeepFromKeys(user, date.replace(tzinfo=timezone.utc).date(), False))
 			formsetInitParams.append(param)
 		currentDayForms = timeEditFormSet(initial=formsetInitParams, queryset = timeKeep.objects.none())
 		return render(request, 'timeEdit.html', {'userformset': currentDayForms})
+	#def my_custom_sql(self):
+		#with connection.cursor() as cursor:
+			#cursor.execute("SELECT ")
