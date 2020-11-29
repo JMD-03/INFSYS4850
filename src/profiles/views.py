@@ -1,9 +1,9 @@
-from django.contrib.auth import login, authenticate
+#from django.contrib.auth import login, authenticate
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from .forms import UserForm, ProfileForm, RequestForm
 from django.contrib.auth.decorators import login_required, permission_required
-from .models import Profile
+#from .models import Profile
 
 # Create your views here.
 

@@ -1,8 +1,20 @@
 {% extends 'base.html' %} {% block content %} {% include 'navbar.html' %}
-<h1>This is our reports page</h1>
+
+<h3>Use this form to choose a custom start and end date for the report.</h1>
+<form method="post">
+{% csrf_token %} {{ form2.as_p}}
+  <button type="submit">Generate Report</button>
+</form>
+<br>
+<br>
+<h3>Use this form to choose a predefined number of days.</h1>
 <form method="post">
 {% csrf_token %} {{ form.as_p}}
   <button type="submit">Generate Report</button>
 </form>
+<br>
+<br>
+<br>
+<p>** These reports include the dates provided when run. They also will assume a lunch break of 30 minutes if an employee only enters a lunch in or lunch out time by mistake</p>
 
 {% endblock %}
