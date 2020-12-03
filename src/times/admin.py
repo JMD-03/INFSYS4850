@@ -5,7 +5,7 @@ from times.models import timeKeep
 
 
 class timesAdmin(admin.ModelAdmin):
-    list_display = ['user', 'in_time', 'out_time', 'dateTimeEntered','week_number']
+    list_display = ['user', 'in_time', 'out_time', 'dateTimeEntered']
     list_per_page = 10
     readonly_fields = ['user', 'clocked_in','is_Manual']
     def has_add_permission(self, request, obj=None):
