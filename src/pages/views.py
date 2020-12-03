@@ -1,6 +1,6 @@
-from django.http import HttpResponse
+#from django.http import HttpResponse
 from django.shortcuts import render, redirect
-from django.contrib import auth
+#from django.contrib import auth
 
 # Create your views here.
 
