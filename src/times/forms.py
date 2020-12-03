@@ -20,12 +20,11 @@ class timeForm(forms.ModelForm):
                    'out_time': DateTimeInput(format='%Y-%m-%d %H:%M'),
                    'clocked_in': forms.HiddenInput(),
                    'is_Manual':forms.HiddenInput(),
-                   'dateTimeEntered': forms.HiddenInput(),
-                   'week_number': forms.HiddenInput(),
+                   'dateTimeEntered': forms.HiddenInput()
                    }
                    
         model = timeKeep
-        fields = ["in_time", "lunchin_time", "lunchout_time", "out_time", "clocked_in", "dateTimeEntered", "week_number"]
+        fields = ["in_time", "lunchin_time", "lunchout_time", "out_time", "clocked_in", "dateTimeEntered"]
 
     
         #model function for manual time incase user goes out of bounds
