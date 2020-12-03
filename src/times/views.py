@@ -14,7 +14,7 @@ from django.http import HttpResponseServerError
 
 # core logic
 
-timeEditFormSet = modelformset_factory(timeKeep, extra = 5, max_num = 5, fields=("in_time", "lunchin_time", "lunchout_time", "out_time", "dateTimeEntered", "user", "week_number"), widgets={"dateTimeEntered": HiddenInput(), "user": HiddenInput(), "week_number":HiddenInput()})
+timeEditFormSet = modelformset_factory(timeKeep, extra = 5, max_num = 5, fields=("in_time", "lunchin_time", "lunchout_time", "out_time", "dateTimeEntered", "user",), widgets={"dateTimeEntered": HiddenInput(), "user": HiddenInput()})
 formsetInitParams = []
 
 @login_required
@@ -109,8 +109,25 @@ def getTimeKeepFromKeys(user, timeType, date, create = False):
 def timeEdit_view(request, *args, **kwargs):
 	global formsetInitParams
 	if 'user' not in request.POST:
-		if 'weeklyTimeSubmit' in request.POST:
-			currentDayForms = timeEditFormSet(request.POST, initial = formsetInitParams, queryset = timeKeep.objects.none())
+		currentDayForms = timeEditFormSet(request.POST, initial = formsetInitParams, queryset = timeKeep.objects.none())
+		if 'last' in request.POST or 'next' in request.POST:
+			datetimeEntered = None
+			for form in currentDayForms:
+				if form.is_valid():
+					datetimeEntered = form.cleaned_data['dateTimeEntered']
+				else:
+					return render(request, 'timeEdit.html', {'userformset': currentDayForms})
+				break
+			if datetimeEntered == None:
+				return render(request, 'timeEdit.html', {'userformset': currentDayForms})
+			weekNumberToday = datetimeEntered.isocalendar().week
+			if 'last' in request.POST:
+				weekNumberToday -= 1
+			elif 'next' in request.POST:
+				weekNumberToday += 1
+			currentDayForms = createWeekFormSet(request.user,weekNumberToday)
+			return render(request, 'timeEdit.html', {'userformset': currentDayForms})
+		elif 'weeklyTimeSubmit' in request.POST:
 			for form in currentDayForms:
 				if form.has_changed() and form.is_valid():
 					user = form.cleaned_data['user']
@@ -130,21 +147,22 @@ def timeEdit_view(request, *args, **kwargs):
 		userform = UserForm(request.POST)
 		if not userform.is_valid():
 			return render(request, 'timeEdit.html', {'form': UserForm(), 'onlyuser': True})
-		user = userform.cleaned_data['user']
-		year = timezone.now().isocalendar().year
-		weekNumberToday = timezone.now().isocalendar().week
-		datesToDisplay = [datetime.strptime(f'{year}-W{weekNumberToday - 1}-{i}', "%Y-W%W-%w") for i in range (1,6)]
-		formsetInitParams = []
-		for date in datesToDisplay:
-			param = None
-			if getTimeKeepFromKeys(user,'Standard Time', date, False) == None:
-				param = {'user': user, 'dateTimeEntered': date.date()}
-			else:
-				param =  model_to_dict(getTimeKeepFromKeys(user,'Standard Time', date, False))
-			formsetInitParams.append(param)
-		currentDayForms = timeEditFormSet(initial=formsetInitParams, queryset = timeKeep.objects.none())
+		currentDayForms = createWeekFormSet(userform.cleaned_data['user'], timezone.now().isocalendar().week)
 		return render(request, 'timeEdit.html', {'userformset': currentDayForms})
 	#def my_custom_sql(self):
 		#with connection.cursor() as cursor:
 			#cursor.execute("SELECT in_time FROM times_timekeep WHERE in_time BETWEEN 2020-11-24 AND 2020-11-31")
 			#cursor.fetchall()
+
+def createWeekFormSet(user, weekNumberToday):
+	year = timezone.now().isocalendar().year
+	datesToDisplay = [datetime.strptime(f'{year}-W{weekNumberToday - 1}-{i}', "%Y-W%W-%w") for i in range (1,6)]
+	formsetInitParams = []
+	for date in datesToDisplay:
+		param = None
+		if getTimeKeepFromKeys(user,'Standard Time', date, False) == None:
+			param = {'user': user, 'dateTimeEntered': date.date()}
+		else:
+			param =  model_to_dict(getTimeKeepFromKeys(user,'Standard Time', date, False))
+		formsetInitParams.append(param)
+	return timeEditFormSet(initial=formsetInitParams, queryset = timeKeep.objects.none())
