@@ -39,6 +39,7 @@ color: white;
 <a href="{% url 'timeEntry' %}">Time Entry</a>
 <a href="{% url 'reports' %}">Reports</a>
 <a href="{% url 'requests' %}">Requests</a>
+<a href="{% url 'timeEdit' %}">Manage Timecard</a>
 <a style="float: right;" href="{% url 'logout' %}">Logout</a>
 {% if request.user.is_staff %}
 <a href="{% url 'profileCreation' %}">Profile Creation</a>

@@ -3,14 +3,14 @@
 {%include 'navbar.html'%}
 <form method="post">
     {% csrf_token %} 
-    <h2>Clock in with the current time.</h2>
+    <h2>Make a time stamp with the current time.</h2>
     <button style="background-color: dodgerblue; color: white;" type="submit" name="autoIn">Auto Clock In</button>
     <button style="background-color: dodgerblue; color: white;" type="submit" name="autoOut">Auto Clock Out</button>
     <br>
     <br>
     {{form.as_p}}
     <br>
-    <h2>Use after manually adjusting time.</h2>
+    <h2>Use after manually adjusting a time stamp.</h2>
     <button style="background-color: dodgerblue; color: white;" type="submit" name="manual">Manual Clock In/Out</button>
 
 </form>

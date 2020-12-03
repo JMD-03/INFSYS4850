@@ -3,14 +3,14 @@
 <h3>Use this form to choose a custom start and end date for the report.</h1>
 <form method="post">
 {% csrf_token %} {{ form2.as_p}}
-  <button type="submit">Generate Report</button>
+  <button style="background-color: dodgerblue; color: white;" type="submit">Generate Report</button>
 </form>
 <br>
 <br>
 <h3>Use this form to choose a predefined number of days.</h1>
 <form method="post">
 {% csrf_token %} {{ form.as_p}}
-  <button type="submit">Generate Report</button>
+  <button style="background-color: dodgerblue; color: white;" type="submit">Generate Report</button>
 </form>
 <br>
 <br>

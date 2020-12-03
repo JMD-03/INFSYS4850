@@ -4,7 +4,7 @@
 <form method="post">
     {% csrf_token %} {{form.as_p}}
     {% if onlyuser %}
-    <button type="submit" name = "userSub">submit</button>
+    <button style="background-color: dodgerblue; color: white;" type="submit" name = "userSub">submit</button>
     {% else %}
 
     {{ userformset.management_form }}
@@ -35,9 +35,9 @@
     </table>
 
 
-    <button type="submit" name="left">"<---"</button>
-    <button type="submit" name="right">"--->"</button>
-    <button type="submit" name="weeklyTimeSubmit">submit</button>
+    <button style="background-color: dodgerblue; color: white;" type="submit" name="left">"<---"</button>
+    <button style="background-color: dodgerblue; color: white;" type="submit" name="right">"--->"</button>
+    <button style="background-color: dodgerblue; color: white;" type="submit" name="weeklyTimeSubmit">Submit</button>
     {% endif %}
 </form>
  {% endblock %}
