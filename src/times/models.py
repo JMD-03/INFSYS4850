@@ -32,8 +32,10 @@ class timeKeep(models.Model):
 
 	clocked_in = models.BooleanField(default = False)
 	
-	#is_Manual = models.BooleanField(default = False)
+	is_Manual = models.BooleanField(default = False)
 
-	dateTimeEntered = models.DateField(default = timezone.now)
+	week_number = models.IntegerField(default = timezone.now().isocalendar().week)
+
+	dateTimeEntered = models.DateTimeField(default = None, null = True)
 	#class Meta:
 	#	constraints = [models.UniqueConstraint(fields=['user', 'dateTimeEntered'], name='unique user date')]
