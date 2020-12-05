@@ -2,19 +2,19 @@
 {% block content %}
 {%include 'navbar.html'%}
 <form method="post">
-    {% csrf_token %} {{form.as_p}}
-    {% if onlyuser %}
+    {% csrf_token %} 
+    {% if onlyuser and request.user.is_staff %}
+    {{form.as_p}}
     <button type="submit" name = "userSub">submit</button>
-    {% else %}
-
     {{ userformset.management_form }}
+    {% else %}
     <table>
     <thead>
     <tr>
         {% for form in userformset %}
         <th>
             <p>
-                {{ forloop.counter0 }}
+                {{ forloop.counter1 }}
             </p>
             <p>
                 {{ form.dateTimeEntered.value }}
@@ -35,8 +35,8 @@
     </table>
 
 
-    <button type="submit" name="left">"<---"</button>
-    <button type="submit" name="right">"--->"</button>
+    <button type="submit" name="last">Last Week</button>
+    <button type="submit" name="next">Next Week</button>
     <button type="submit" name="weeklyTimeSubmit">submit</button>
     {% endif %}
 </form>
