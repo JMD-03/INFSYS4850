@@ -14,7 +14,7 @@ from django.http import HttpResponseServerError
 
 # core logic
 
-timeEditFormSet = modelformset_factory(timeKeep, extra = 5, max_num = 5, fields=("in_time", "lunchin_time", "lunchout_time", "out_time", "dateTimeEntered", "user",), widgets={"dateTimeEntered": HiddenInput(), "user": HiddenInput()})
+timeEditFormSet = modelformset_factory(timeKeep, form = timeForm, extra = 5, max_num = 5, fields=("in_time", "lunchin_time", "lunchout_time", "out_time", "dateTimeEntered", "user",), widgets={"dateTimeEntered": HiddenInput(), "user": HiddenInput()})
 formsetInitParams = []
 
 @login_required
@@ -23,7 +23,7 @@ def timeEntry_view(request, *args, **kwargs):
 	if current == "MultiObj":
 		return HttpResponseServerError("Can't have more than one time entry per day, Please Contact Management/Supervisors. /n Hit the back button to go back")
 	if request.method == 'POST':
-		currentReqForm = timeForm(request.POST)
+		currentReqForm = timeForm(request.POST, user = request.user)
 		if currentReqForm.is_valid():
 			#currentReqForm.save()
 			if 'manual' in request.POST and currentReqForm.is_valid():
@@ -63,35 +63,39 @@ def timeEntry_view(request, *args, **kwargs):
 					inCurrent.clocked_in = False
 					inCurrent.is_Manual = True
 					inCurrent.save()
-		else:
+		#else:
 			# Error area
-			current = getTimeKeepFromKeys(request.user,'Standard Time', timezone.now(), True)
-			date = timezone.now()
-			if 'autoIn' in request.POST:
-				current.in_time = date
-				current.clocked_in = True
-				#print("autoin")
-				current.save()
-			elif 'lunchIn' in request.POST:
-				current.lunchin_time = date
-				current.clocked_in = False
-				current.save()
-			elif 'lunchOut' in request.POST:
-				current.lunchout_time = date
-				current.clocked_in = True
-				current.save()
-			elif 'autoOut' in request.POST:
-				current.out_time = date
-				current.clocked_in = False
-				current.save()
-				#print("autoout")
-			else:
-				return render(request, 'timeEntry.html', {'form' : currentReqForm})
-		return redirect('/admin/times/timekeep')
+		current = getTimeKeepFromKeys(request.user,'Standard Time', timezone.now(), True)
+		date = timezone.now()
+		if 'autoIn' in request.POST:
+			current.in_time = date
+			current.dateTimeEntered = date.date()
+			current.clocked_in = True
+			print("autoin")
+			current.save()
+		elif 'lunchIn' in request.POST:
+			current.lunchin_time = date
+			current.dateTimeEntered = date.date()
+			current.clocked_in = False
+			current.save()
+		elif 'lunchOut' in request.POST:
+			current.lunchout_time = date
+			current.dateTimeEntered = date.date()
+			current.clocked_in = True
+			current.save()
+		elif 'autoOut' in request.POST:
+			current.out_time = date
+			current.dateTimeEntered = date.date()
+			current.clocked_in = False
+			current.save()
+			#print("autoout")
+		else:
+			return render(request, 'timeEntry.html', {'form' : currentReqForm})
+		return render(request, 'timeEntry.html', {'form' : currentReqForm})
 	else:
 		if not current:
 			current = timeKeep(user = request.user,dateTimeEntered = timezone.now())
-		form = timeForm(instance = current)
+		form = timeForm(instance = current, user = request.user)
 	return render(request, 'timeEntry.html', {'form' : form})
 
 def getTimeKeepFromKeys(user, timeType, date, create = False):
@@ -105,7 +109,6 @@ def getTimeKeepFromKeys(user, timeType, date, create = False):
 	return None
 
 @login_required
-@permission_required("reports.supervisor_view", "reports.management_view")
 def timeEdit_view(request, *args, **kwargs):
 	global formsetInitParams
 	if 'user' not in request.POST:
