@@ -1,10 +1,106 @@
 {% extends 'base.html' %}
 {% block content %}
 {%include 'navbar.html'%}
+<head>
+    <style>
+        .help-tip{
+    position: absolute;
+    top: 18px;
+    right: 18px;
+    text-align: center;
+    background-color: #BCDBEA;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    font-size: 14px;
+    line-height: 26px;
+    cursor: default;
+}
+
+.help-tip:before{
+    content:'?';
+    font-weight: bold;
+    color:#fff;
+}
+
+.help-tip:hover p{
+    display:block;
+    transform-origin: 100% 0%;
+
+    -webkit-animation: fadeIn 0.3s ease-in-out;
+    animation: fadeIn 0.3s ease-in-out;
+
+}
+
+.help-tip p{    /* The tooltip */
+    display: none;
+    text-align: left;
+    background-color: #1E2021;
+    padding: 20px;
+    width: 300px;
+    position: absolute;
+    border-radius: 3px;
+    box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.2);
+    right: -4px;
+    color: #FFF;
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+.help-tip p:before{ /* The pointer of the tooltip */
+    position: absolute;
+    content: '';
+    width:0;
+    height: 0;
+    border:6px solid transparent;
+    border-bottom-color:#1E2021;
+    right:10px;
+    top:-12px;
+}
+
+.help-tip p:after{ /* Prevents the tooltip from being hidden */
+    width:100%;
+    height:40px;
+    content:'';
+    position: absolute;
+    top:-40px;
+    left:0;
+}
+
+/* CSS animation */
+
+@-webkit-keyframes fadeIn {
+    0% { 
+        opacity:0; 
+        transform: scale(0.6);
+    }
+
+    100% {
+        opacity:100%;
+        transform: scale(1);
+    }
+}
+
+@keyframes fadeIn {
+    0% { opacity:0; }
+    100% { opacity:100%; }
+}
+    </style>
+</head>
+<div class="help-tip">
+    <p>
+<b>*Select Employee:</b> This drop down menu will allow you to select the employee whose time needs to be edited.<br>
+<b>*Submit:</b> This button will allow you to view the selected employees time entries for the current week<br>
+<b>*Adjusting Time:</b> Click in the field with the missing time entry, or wrong time entry, and create the new time by using the widget<br>
+<b>*Previous Week:</b> This button will allow you to view the previous weeks time entries<br>
+<b>*Next Week:</b> This button will allow for you to view the next weeks time entries<br>
+<b>*Submit:</b> Use this button to save all of the edits made to the employees time sheet<br>
+    </p>
+  </div>
 <form method="post">
     {% csrf_token %} {{form.as_p}}
     {% if onlyuser %}
-    <button style="background-color: dodgerblue; color: white;" type="submit" name = "userSub">submit</button>
+    <button style="background-color: dodgerblue; color: white;" type="submit" name = "userSub">Submit</button>
     {% else %}
 
     {{ userformset.management_form }}
@@ -35,8 +131,8 @@
     </table>
 
 
-    <button style="background-color: dodgerblue; color: white;" type="submit" name="left">"<---"</button>
-    <button style="background-color: dodgerblue; color: white;" type="submit" name="right">"--->"</button>
+    <button style="background-color: dodgerblue; color: white;" type="submit" name="left">Previous Week</button>
+    <button style="background-color: dodgerblue; color: white;" type="submit" name="right">Next Week</button>
     <button style="background-color: dodgerblue; color: white;" type="submit" name="weeklyTimeSubmit">Submit</button>
     {% endif %}
 </form>

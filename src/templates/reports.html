@@ -1,5 +1,100 @@
 {% extends 'base.html' %} {% block content %} {% include 'navbar.html' %}
+<head>
+  <style>
+      .help-tip{
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  text-align: center;
+  background-color: #BCDBEA;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  font-size: 14px;
+  line-height: 26px;
+  cursor: default;
+}
 
+.help-tip:before{
+  content:'?';
+  font-weight: bold;
+  color:#fff;
+}
+
+.help-tip:hover p{
+  display:block;
+  transform-origin: 100% 0%;
+
+  -webkit-animation: fadeIn 0.3s ease-in-out;
+  animation: fadeIn 0.3s ease-in-out;
+
+}
+
+.help-tip p{    /* The tooltip */
+  display: none;
+  text-align: left;
+  background-color: #1E2021;
+  padding: 20px;
+  width: 300px;
+  position: absolute;
+  border-radius: 3px;
+  box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.2);
+  right: -4px;
+  color: #FFF;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.help-tip p:before{ /* The pointer of the tooltip */
+  position: absolute;
+  content: '';
+  width:0;
+  height: 0;
+  border:6px solid transparent;
+  border-bottom-color:#1E2021;
+  right:10px;
+  top:-12px;
+}
+
+.help-tip p:after{ /* Prevents the tooltip from being hidden */
+  width:100%;
+  height:40px;
+  content:'';
+  position: absolute;
+  top:-40px;
+  left:0;
+}
+
+/* CSS animation */
+
+@-webkit-keyframes fadeIn {
+  0% { 
+      opacity:0; 
+      transform: scale(0.6);
+  }
+
+  100% {
+      opacity:100%;
+      transform: scale(1);
+  }
+}
+
+@keyframes fadeIn {
+  0% { opacity:0; }
+  100% { opacity:100%; }
+}
+  </style>
+</head>
+<div class="help-tip">
+  <p>
+    <b>*Employee Choice:</b> This menu will allow you to select the employee, or employees that you want to view their report<br>
+    <b>*Report Type:</b> This will allow you to view the report either in a web based view through the website, or in a downloadable .csv file that can be opened in excel<br>
+    <b>*Start Date:</b> Use this widget to select the start of the time frame of the report<br>
+    <b>*End Date:</b> Use this widget to select the end of the time frame of the report<br>
+    <b>*Generate Report:</b> Use this button to generate the report<br>
+    <b>*Time Frame:</b> This drop down menu will allow you to select the time frame of the report, the time frames are 7 days, 14 days, 30 days, 90 days, and 180 days.
+    </p>
+</div>
 <h3>Use this form to choose a custom start and end date for the report.</h1>
 <form method="post">
 {% csrf_token %} {{ form2.as_p}}
