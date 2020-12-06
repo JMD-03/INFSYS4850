@@ -1,13 +1,19 @@
 {% extends 'base.html' %}
 {% block content %}
 {%include 'navbar.html'%}
+<style> h1 {text-align: center;} </style>
 <form method="post">
     {% csrf_token %} 
-    {% if onlyuser and request.user.is_staff %}
+    {% if onlyuser and request.user.is_staff%}
     {{form.as_p}}
     <button type="submit" name = "userSub">submit</button>
-    {{ userformset.management_form }}
     {% else %}
+    {% if request.user.is_staff%}
+    <h1> Time Edit </h1>
+    {% else %}
+    <h1> Time View </h1>
+    {% endif %}
+    {{ userformset.management_form }}
     <table>
     <thead>
     <tr>
@@ -34,10 +40,12 @@
     </tbody>
     </table>
 
-
+    
     <button type="submit" name="last">Last Week</button>
     <button type="submit" name="next">Next Week</button>
+    {% if request.user.is_staff %}
     <button type="submit" name="weeklyTimeSubmit">submit</button>
+    {% endif %}
     {% endif %}
 </form>
  {% endblock %}
