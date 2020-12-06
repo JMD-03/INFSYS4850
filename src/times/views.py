@@ -43,28 +43,28 @@ def timeEntry_view(request, *args, **kwargs):
 					lunchin_time = currentReqForm.cleaned_data['lunchin_time']
 					inCurrent = getTimeKeepFromKeys(request.user,'Standard Time', lunchin_time, True)
 					inCurrent.lunchin_time = lunchin_time
-					inCurrent.dateTimeEntered = lunchin_time
-					inCurrent.week_number = lunchin_time.isocalendar().week
+					inCurrent.dateTimeEntered = lunchin_time.date()
+					#inCurrent.week_number = lunchin_time.isocalendar().week
 					inCurrent.clocked_in = False
 					inCurrent.is_Manual = True
-					messages.success(request, "you have successfully lunch clocked in")
+					messages.success(request, "you have successfully clocked in for lunch")
 					inCurrent.save()
 				if 'lunchout_time' in currentReqForm.changed_data:
 					lunchout_time = currentReqForm.cleaned_data['lunchout_time']
 					inCurrent = getTimeKeepFromKeys(request.user, 'Standard Time',lunchout_time, True)
 					inCurrent.lunchout_time = lunchout_time
 					inCurrent.dateTimeEntered = lunchout_time.date()
-					inCurrent.week_number = lunchout_time.isocalendar().week
+					#inCurrent.week_number = lunchout_time.isocalendar().week
 					inCurrent.clocked_in = True
 					inCurrent.is_Manual = True
-					messages.success(request, "you have successfully lunch clocked out")
+					messages.success(request, "you have successfully clocked out for lunch")
 					inCurrent.save()
 				if 'out_time' in currentReqForm.changed_data:
 					out_time = currentReqForm.cleaned_data['out_time']
 					inCurrent = getTimeKeepFromKeys(request.user,'Standard Time', out_time, True)
 					inCurrent.out_time = out_time
 					inCurrent.dateTimeEntered = out_time.date()
-					inCurrent.week_number = out_time.isocalendar().week
+					#inCurrent.week_number = out_time.isocalendar().week
 					inCurrent.clocked_in = False
 					inCurrent.is_Manual = True
 					messages.success(request, "you have successfully clocked out")
@@ -73,35 +73,40 @@ def timeEntry_view(request, *args, **kwargs):
 			# Error area
 			current = getTimeKeepFromKeys(request.user,'Standard Time', timezone.now(), True)
 		date = timezone.now()
-		if 'autoIn' in request.POST:
-			current.in_time = date
-			current.dateTimeEntered = date.date()
-			current.clocked_in = True
-			leave_time = current.in_time + timedelta(hours = 8)
-			messages.success(request, "you have successfully clocked in %s" %leave_time)
-			print("autoin")
-			current.save()
-		elif 'lunchIn' in request.POST:
-			current.lunchin_time = date
-			current.dateTimeEntered = date.date()
-			current.clocked_in = False
-			messages.success(request, "you have successfully lunch clocked in")
-			current.save()
-		elif 'lunchOut' in request.POST:
-			current.lunchout_time = date
-			current.dateTimeEntered = date.date()
-			current.clocked_in = True
-			messages.success(request, "you have successfully lunch clocked out")
-			current.save()
-		elif 'autoOut' in request.POST:
-			current.out_time = date
-			current.dateTimeEntered = date.date()
-			current.clocked_in = False
-			messages.success(request, "you have successfully clocked out")
-			current.save()
-			#print("autoout")
-		else:
-			return render(request, 'timeEntry.html', {'form' : currentReqForm})
+		if 'autoIn' in request.POST or 'lunchIn' in request.POST or 'lunchOut' in request.POST or 'autoOut' in request.POST:
+			if 'autoIn' in request.POST:
+				current.in_time = date
+				current.dateTimeEntered = date.date()
+				current.clocked_in = True
+				leave_time = current.in_time + timedelta(hours = 8)
+				messages.success(request, "you have successfully clocked in, clock out time must be %s" %leave_time)
+				print("autoin")
+				current.save()
+			elif 'lunchIn' in request.POST:
+				current.lunchin_time = date
+				current.dateTimeEntered = date.date()
+				current.clocked_in = False
+				messages.success(request, "you have successfully clocked in for lunch")
+				current.save()
+			elif 'lunchOut' in request.POST:
+				current.lunchout_time = date
+				current.dateTimeEntered = date.date()
+				current.clocked_in = True
+				messages.success(request, "you have successfully clocked out for lunch")
+				current.save()
+			elif 'autoOut' in request.POST:
+				current.out_time = date
+				current.dateTimeEntered = date.date()
+				current.clocked_in = False
+				messages.success(request, "you have successfully clocked out")
+				current.save()
+				if (current.out_time - current.in_time) > timedelta(hours = 8):
+					messages.error(request, "you have clocked in over eight hours, please talk to management to fix your time")
+				#print("autoout")
+			# else:
+			# 	return render(request, 'timeEntry.html', {'form' : currentReqForm})
+			form = timeForm(instance = current, user = request.user)
+			return render(request, 'timeEntry.html', {'form':form})
 		return render(request, 'timeEntry.html', {'form' : currentReqForm})
 	else:
 		if not current:
@@ -135,13 +140,13 @@ def timeEdit_view(request, *args, **kwargs):
 					break
 				if datetimeEntered == None:
 					return render(request, 'timeEdit.html', {'userformset': currentDayForms})
-				weekNumberToday = datetimeEntered.isocalendar().week
+				timechange = timedelta(weeks = 1)
 				if 'last' in request.POST:
-					weekNumberToday -= 1
+					datetimeEntered -= timechange
 				elif 'next' in request.POST:
-					weekNumberToday += 1
+					datetimeEntered += timechange
 				user = form.cleaned_data['user']
-				currentDayForms = createWeekFormSet(user,weekNumberToday)
+				currentDayForms = createWeekFormSet(user,datetimeEntered)
 				return render(request, 'timeEdit.html', {'userformset': currentDayForms})
 			elif 'weeklyTimeSubmit' in request.POST:
 				for form in currentDayForms:
@@ -164,7 +169,7 @@ def timeEdit_view(request, *args, **kwargs):
 			userform = UserForm(request.POST)
 			if not userform.is_valid():
 				return render(request, 'timeEdit.html', {'form': UserForm(), 'onlyuser': True})
-			currentDayForms = createWeekFormSet(userform.cleaned_data['user'], timezone.now().isocalendar().week)
+			currentDayForms = createWeekFormSet(userform.cleaned_data['user'], timezone.now())
 			return render(request, 'timeEdit.html', {'userformset': currentDayForms})
 	else:
 		currentDayForms = timeEditFormSet(request.POST, initial = formsetInitParams, queryset = timeKeep.objects.none())
@@ -178,12 +183,12 @@ def timeEdit_view(request, *args, **kwargs):
 				break
 			if datetimeEntered == None:
 				return render(request, 'timeEdit.html', {'userformset': currentDayForms})
-			weekNumberToday = datetimeEntered.isocalendar().week
+			timechange = timedelta(weeks = 1)
 			if 'last' in request.POST:
-				weekNumberToday -= 1
+				datetimeEntered -= timechange
 			elif 'next' in request.POST:
-				weekNumberToday += 1
-			currentDayForms = createWeekFormSet(request.user,weekNumberToday)
+				datetimeEntered += timechange
+			currentDayForms = createWeekFormSet(request.user,datetimeEntered)
 			return render(request, 'timeEdit.html', {'userformset': currentDayForms})
 		elif 'weeklyTimeSubmit' in request.POST:
 			for form in currentDayForms:
@@ -199,16 +204,27 @@ def timeEdit_view(request, *args, **kwargs):
 					if currentFormTimeKeep.in_time is None:
 							currentFormTimeKeep.delete()
 			return render(request, 'timeEdit.html', {'userformset': currentDayForms})
-		currentDayForms = createWeekFormSet(request.user, timezone.now().isocalendar().week)
+		currentDayForms = createWeekFormSet(request.user, timezone.now())
 		return render(request, 'timeEdit.html', {'userformset': currentDayForms})
 		#def my_custom_sql(self):
 			#with connection.cursor() as cursor:
 				#cursor.execute("SELECT in_time FROM times_timekeep WHERE in_time BETWEEN 2020-11-24 AND 2020-11-31")
 				#cursor.fetchall()
 
-def createWeekFormSet(user, weekNumberToday):
-	year = timezone.now().isocalendar().year
-	datesToDisplay = [datetime.strptime(f'{year}-W{weekNumberToday - 1}-{i}', "%Y-W%W-%w") for i in range (1,6)]
+def createWeekFormSet(user, datetimeEntered):
+	#year = timezone.now().isocalendar()[0]
+	# if weekNumberToday == 54:
+	# 	print("a")
+	# 	weekNumberToday = 0
+	# 	year += 1
+	# 	print(year)
+	# elif weekNumberToday == 0:
+	# 	print("b")
+	# 	weekNumberToday = 1
+	# 	year -= 1
+	year, weekNumberToday, _ = datetimeEntered.isocalendar()
+	datesToDisplay = [datetimeEntered + timedelta(days = i) for i in range(1, 6)]
+	# datesToDisplay = [datetime.strptime(f'{year}-W{weekNumberToday - 1}-{i}', "%Y-W%W-%w") for i in range (1,6)]
 	formsetInitParams = []
 	for date in datesToDisplay:
 		param = None
