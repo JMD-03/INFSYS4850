@@ -1,6 +1,16 @@
 {% extends 'base.html' %} {% block content %}
 {%include 'navbar.html' %}
-<h1>Employee Requests Page</h1>
+<h2>Enter Your Requests Here</h2>
+
+{% if messages %}
+<ul class="messages">
+  {% for message in messages %}
+  <li {% if message.tags %} class="{{ message.tags }}"{% endif %}> {{message}} </li>
+  {% endfor %}
+</ul>
+{% endif %}
+
+
 <form style="float:initial;" method="post">
   {% csrf_token %}  {{form.as_p}}
   <button style="background-color: dodgerblue; color: white;" type="submit">Submit Request</button>

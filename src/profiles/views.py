@@ -19,7 +19,7 @@ def profileCreation_view(request, *args, **kwargs):
             form2.user = user
             form2.save()
             messages.success(request, 'New account was created successfully')
-            return redirect('/admin')
+            return redirect('/profileCreation')
     else:
         form1 = UserForm()
         form2 = ProfileForm()
@@ -34,7 +34,7 @@ def requests_view(request, *args, **kwargs):
             user = form.save(commit=False)
             user.user = request.user
             form.save()
-            #Need to fix the redirect, this is just for testing
+            messages.success(request, 'Your request has been successfully submitted!')
             return redirect('/requests')
     else:
         form = RequestForm(user=request.user)

@@ -3,7 +3,8 @@ from django.forms.widgets import DateTimeInput
 from django.forms import ModelForm
 from django.forms import modelformset_factory
 from django.contrib.auth.models import User
-import datetime
+from django.utils import timezone
+from django.utils.timezone import datetime
 from times.models import timeKeep
 
 #input for widget
@@ -18,7 +19,8 @@ class timeForm(forms.ModelForm):
                    'lunchout_time': DateTimeInput(format='%Y-%m-%d %H:%M'),
                    'out_time': DateTimeInput(format='%Y-%m-%d %H:%M'),
                    'clocked_in': forms.HiddenInput(),
-                   'dateTimeEntered': forms.HiddenInput(),
+                   'is_Manual':forms.HiddenInput(),
+                   'dateTimeEntered': forms.HiddenInput()
                    }
                    
         model = timeKeep
@@ -32,6 +34,9 @@ class timeForm(forms.ModelForm):
         lunchin_Time = cleaned_data.get("lunchin_time")
         lunchout_Time = cleaned_data.get("lunchout_time")
         out_Time = cleaned_data.get("out_time")
+        #datetimeEntered = cleaned_data.get("dateTimeEntered")
+        #timeKeep.objects.filter(user = self.instance.user).get(dateTimeEntered = datetimeEntered.date())
+        #print(timeKeep.in_time)
         if out_Time:
             timecheck(out_Time)
             if lunchout_Time  and out_Time < lunchout_Time:
@@ -59,9 +64,11 @@ class timeForm(forms.ModelForm):
 def timecheck(date):
     if date.weekday() == 5 or date.weekday() == 6:
         raise forms.ValidationError("you cannot clock in on a weekend")
-    time_right_now = datetime.datetime.now().replace(tzinfo = None)
-    if (date.replace(tzinfo=None) - time_right_now).days > 7 or (date.replace(tzinfo=None) - time_right_now).days *24 *60 < -3:
+    time_right_now = timezone.now()
+    if (date - time_right_now).days > 7:
         raise forms.ValidationError("you must clock in within the week.")
+    if (date - time_right_now).days < -1:
+        raise forms.ValidationError("you cannot clock in before today")
 
 
         
