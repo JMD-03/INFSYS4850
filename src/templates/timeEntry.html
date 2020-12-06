@@ -98,26 +98,34 @@
 </div>
 <form method="post">
     {% csrf_token %}
-    <h2>Use these buttons to make a time stamp with the current time.</h2> 
-    <br>
-    <button style="background-color: dodgerblue; color: white;" type="submit" name="autoOut">Auto Clock Out</button>
-    {% if not form.clocked_in.value and form.in_time.value == None %}
-    <button style="background-color: dodgerblue; color: white;" type="submit" name="autoIn">Auto Clock In</button>
-    {% elif form.clocked_in.value == True and form.in_time.value != None and form.lunchin_time.value == None%}
-    <button style="background-color: dodgerblue; color: white;" type="submit" name="lunchIn">Auto Lunch Start</button>
-    {% elif not form.clocked_in.value == True and form.lunchin_time.value != None and form.lunchout_time.value == None %}
-    <button style="background-color: dodgerblue; color: white;" type="submit" name="lunchOut">Auto Lunch End</button>
-    {% elif form.clocked_in.value == True and form.lunchout_time.value != None and form.out_time.value == None %}
-    <br>
-    <br>
+    {%now 'w' as var1%}
+    {%if var1 == 1 or var1 == 2 or var1 == 3 or var1 == 4 or var1 == 5%} 
+    <h2>Clock in with the current time.</h2>
+
+
+    <input style="background-color: dodgerblue; color: white;" type="submit" name="autoIn" class = "btn btn-primary" value = "Auto Clock In"{% if not form.clocked_in.value and form.in_time.value == None %}enabled{%else%}disabled{% endif %}/>
+
+
+    <input style="background-color: dodgerblue; color: white;" type="submit" name="lunchIn" class = "btn btn-primary" value = "Auto Lunch Clock In"{% if form.clocked_in.value == True and form.in_time.value != None and form.lunchin_time.value == None%}enabled{%else%}disabled{% endif %}/>
+
+    <input style="background-color: dodgerblue; color: white;" type="submit" name="lunchOut" class = "btn btn-primary" value = "Auto Lunch Clock Out"{% if not form.clocked_in.value == True and form.lunchin_time.value != None and form.lunchout_time.value == None %}enabled{%else%}disabled{% endif %}/>
+
+    <input style="background-color: dodgerblue; color: white;" type="submit" name="autoOut" class = "btn btn-primary" value = "Auto Clock Out"{% if form.clocked_in.value == True and form.in_time.value != None and form.out_time.value == None %}enabled{%else%}disabled{% endif %}/>
+    <br><br><br>
+    {% endif %}
     {{form.as_p}}
-    <br>
-    <h2>Use this button after making a manual adjustment.</h2>
+    <h2>Use for manually entering time.</h2>
+    <p>Note: This will flag your entry as manual.</p>
+    <p>This should be used as a backup to the auto entry buttons above.</p>
     <br>
     <button style="background-color: dodgerblue; color: white;" type="submit" name="manual">Manual Clock In/Out</button>
-    
-    
-    {% endif %}
-</form>
 
- {% endblock %}
+</form>
+{% if messages %}
+    {% for message in messages %}
+        {% if message.tags == 'success'%}
+            <li>{{message}}</li>
+        {% endif %}
+    {% endfor %}
+{% endif %}
+{% endblock %}
