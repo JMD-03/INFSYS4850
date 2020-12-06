@@ -8,8 +8,9 @@ from django.utils import timezone
 from django.forms.widgets import TextInput
 from django.db import connection
 from django.utils import timezone
-from django.utils.timezone import datetime
+from django.utils.timezone import datetime, timedelta
 from django.http import HttpResponseServerError
+from django.contrib import messages
 
 
 # core logic
@@ -32,18 +33,21 @@ def timeEntry_view(request, *args, **kwargs):
 					inCurrent = getTimeKeepFromKeys(request.user,'Standard Time', in_time, True)
 					inCurrent.in_time = in_time
 					inCurrent.dateTimeEntered = in_time.date()
-					inCurrent.week_number = in_time.isocalendar().week
+					#inCurrent.week_number = in_time.isocalendar().week
 					inCurrent.clocked_in = True
 					inCurrent.is_Manual = True
+					leave_time = in_time + timedelta(hours = 8)
+					messages.success(request, "you have successfully clocked in, clock out time must be %s" %leave_time)
 					inCurrent.save()
 				if 'lunchin_time' in currentReqForm.changed_data:
 					lunchin_time = currentReqForm.cleaned_data['lunchin_time']
 					inCurrent = getTimeKeepFromKeys(request.user,'Standard Time', lunchin_time, True)
 					inCurrent.lunchin_time = lunchin_time
-					inCurrent.dateTimeEntered = lunchin_time.date()
+					inCurrent.dateTimeEntered = lunchin_time
 					inCurrent.week_number = lunchin_time.isocalendar().week
 					inCurrent.clocked_in = False
 					inCurrent.is_Manual = True
+					messages.success(request, "you have successfully lunch clocked in")
 					inCurrent.save()
 				if 'lunchout_time' in currentReqForm.changed_data:
 					lunchout_time = currentReqForm.cleaned_data['lunchout_time']
@@ -53,6 +57,7 @@ def timeEntry_view(request, *args, **kwargs):
 					inCurrent.week_number = lunchout_time.isocalendar().week
 					inCurrent.clocked_in = True
 					inCurrent.is_Manual = True
+					messages.success(request, "you have successfully lunch clocked out")
 					inCurrent.save()
 				if 'out_time' in currentReqForm.changed_data:
 					out_time = currentReqForm.cleaned_data['out_time']
@@ -62,31 +67,37 @@ def timeEntry_view(request, *args, **kwargs):
 					inCurrent.week_number = out_time.isocalendar().week
 					inCurrent.clocked_in = False
 					inCurrent.is_Manual = True
+					messages.success(request, "you have successfully clocked out")
 					inCurrent.save()
-		#else:
+		else:
 			# Error area
-		current = getTimeKeepFromKeys(request.user,'Standard Time', timezone.now(), True)
+			current = getTimeKeepFromKeys(request.user,'Standard Time', timezone.now(), True)
 		date = timezone.now()
 		if 'autoIn' in request.POST:
 			current.in_time = date
 			current.dateTimeEntered = date.date()
 			current.clocked_in = True
+			leave_time = current.in_time + timedelta(hours = 8)
+			messages.success(request, "you have successfully clocked in %s" %leave_time)
 			print("autoin")
 			current.save()
 		elif 'lunchIn' in request.POST:
 			current.lunchin_time = date
 			current.dateTimeEntered = date.date()
 			current.clocked_in = False
+			messages.success(request, "you have successfully lunch clocked in")
 			current.save()
 		elif 'lunchOut' in request.POST:
 			current.lunchout_time = date
 			current.dateTimeEntered = date.date()
 			current.clocked_in = True
+			messages.success(request, "you have successfully lunch clocked out")
 			current.save()
 		elif 'autoOut' in request.POST:
 			current.out_time = date
 			current.dateTimeEntered = date.date()
 			current.clocked_in = False
+			messages.success(request, "you have successfully clocked out")
 			current.save()
 			#print("autoout")
 		else:
@@ -111,7 +122,51 @@ def getTimeKeepFromKeys(user, timeType, date, create = False):
 @login_required
 def timeEdit_view(request, *args, **kwargs):
 	global formsetInitParams
-	if 'user' not in request.POST:
+	if request.user.is_staff:
+		if 'user' not in request.POST:
+			currentDayForms = timeEditFormSet(request.POST, initial = formsetInitParams, queryset = timeKeep.objects.none())
+			if 'last' in request.POST or 'next' in request.POST:
+				datetimeEntered = None
+				for form in currentDayForms:
+					if form.is_valid():
+						datetimeEntered = form.cleaned_data['dateTimeEntered']
+					else:
+						return render(request, 'timeEdit.html', {'userformset': currentDayForms})
+					break
+				if datetimeEntered == None:
+					return render(request, 'timeEdit.html', {'userformset': currentDayForms})
+				weekNumberToday = datetimeEntered.isocalendar().week
+				if 'last' in request.POST:
+					weekNumberToday -= 1
+				elif 'next' in request.POST:
+					weekNumberToday += 1
+				user = form.cleaned_data['user']
+				currentDayForms = createWeekFormSet(user,weekNumberToday)
+				return render(request, 'timeEdit.html', {'userformset': currentDayForms})
+			elif 'weeklyTimeSubmit' in request.POST:
+				for form in currentDayForms:
+					if form.has_changed() and form.is_valid():
+						user = form.cleaned_data['user']
+						dateTimeEntered = form.cleaned_data['dateTimeEntered']
+						currentFormTimeKeep = getTimeKeepFromKeys(user, 'Standard Time', dateTimeEntered, True)
+						currentFormTimeKeep.in_time = form.cleaned_data['in_time']
+						currentFormTimeKeep.lunchin_time = form.cleaned_data['lunchin_time']
+						currentFormTimeKeep.lunchout_time = form.cleaned_data['lunchout_time']
+						currentFormTimeKeep.out_time = form.cleaned_data['out_time']
+						currentFormTimeKeep.save()
+						if currentFormTimeKeep.in_time is None:
+							currentFormTimeKeep.delete()
+				return render(request, 'timeEdit.html', {'userformset': currentDayForms})
+			else:
+				userform = UserForm()
+				return render(request, 'timeEdit.html', {'form': userform, 'onlyuser': True})
+		else:
+			userform = UserForm(request.POST)
+			if not userform.is_valid():
+				return render(request, 'timeEdit.html', {'form': UserForm(), 'onlyuser': True})
+			currentDayForms = createWeekFormSet(userform.cleaned_data['user'], timezone.now().isocalendar().week)
+			return render(request, 'timeEdit.html', {'userformset': currentDayForms})
+	else:
 		currentDayForms = timeEditFormSet(request.POST, initial = formsetInitParams, queryset = timeKeep.objects.none())
 		if 'last' in request.POST or 'next' in request.POST:
 			datetimeEntered = None
@@ -141,21 +196,15 @@ def timeEdit_view(request, *args, **kwargs):
 					currentFormTimeKeep.lunchout_time = form.cleaned_data['lunchout_time']
 					currentFormTimeKeep.out_time = form.cleaned_data['out_time']
 					currentFormTimeKeep.save()
+					if currentFormTimeKeep.in_time is None:
+							currentFormTimeKeep.delete()
 			return render(request, 'timeEdit.html', {'userformset': currentDayForms})
-		else:
-			userform = UserForm()
-			return render(request, 'timeEdit.html', {'form': userform, 'onlyuser': True})
-			
-	else:
-		userform = UserForm(request.POST)
-		if not userform.is_valid():
-			return render(request, 'timeEdit.html', {'form': UserForm(), 'onlyuser': True})
-		currentDayForms = createWeekFormSet(userform.cleaned_data['user'], timezone.now().isocalendar().week)
+		currentDayForms = createWeekFormSet(request.user, timezone.now().isocalendar().week)
 		return render(request, 'timeEdit.html', {'userformset': currentDayForms})
-	#def my_custom_sql(self):
-		#with connection.cursor() as cursor:
-			#cursor.execute("SELECT in_time FROM times_timekeep WHERE in_time BETWEEN 2020-11-24 AND 2020-11-31")
-			#cursor.fetchall()
+		#def my_custom_sql(self):
+			#with connection.cursor() as cursor:
+				#cursor.execute("SELECT in_time FROM times_timekeep WHERE in_time BETWEEN 2020-11-24 AND 2020-11-31")
+				#cursor.fetchall()
 
 def createWeekFormSet(user, weekNumberToday):
 	year = timezone.now().isocalendar().year
