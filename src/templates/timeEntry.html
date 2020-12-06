@@ -2,19 +2,28 @@
 {% block content %}
 {%include 'navbar.html'%}
 <form method="post">
-    {% csrf_token %} {{form.as_p}}
-    <button type="submit" name="manual">Manual Clock In/Out</button>
-    {% comment %} <input type="submit" name="autoIn" class = "btn btn-primary" value = "Auto Clock In" disabled/> {% endcomment %}
-    {% comment %} <input type="submit" disabled name="lunchIn" class = "btn btn-primary">Auto lunch Clock In</button> {% endcomment %}
-    {% comment %} <input type="submit" disabled name="lunchOut" class = "btn btn-primary">Auto lunch Clock Out</button> {% endcomment %}
-    {% comment %} <input type="submit" disabled name="autoOut" class = "btn btn-primary">Auto Clock Out</button>  {% endcomment %}
-    <input type="submit" name="autoIn" class = "btn btn-primary" value = "Auto Clock In"{% if not form.clocked_in.value and form.in_time.value == None %}enabled{%else%}disabled{% endif %}/>
-    {% comment %} {% elif form.clocked_in.value == True and form.in_time.value != None and form.lunchin_time.value == None%} {% endcomment %}
-    <input type="submit" name="lunchIn" class = "btn btn-primary" value = "Auto Lunch Clock In"{% if form.clocked_in.value == True and form.in_time.value != None and form.lunchin_time.value == None%}enabled{%else%}disabled{% endif %}/>
-    {% comment %} {% elif not form.clocked_in.value == True and form.lunchin_time.value != None and form.lunchout_time.value == None %} {% endcomment %}
-    <input type="submit" name="lunchOut" class = "btn btn-primary" value = "Auto Lunch Clock Out"{% if not form.clocked_in.value == True and form.lunchin_time.value != None and form.lunchout_time.value == None %}enabled{%else%}disabled{% endif %}/>
-    {% comment %} {% elif form.clocked_in.value == True and form.in_time.value != None and form.out_time.value == None %} {% endcomment %}
-    <input type="submit" name="autoOut" class = "btn btn-primary" value = "Auto Clock Out"{% if form.clocked_in.value == True and form.in_time.value != None and form.out_time.value == None %}enabled{%else%}disabled{% endif %}/>
-    {% comment %} {% endif %} {% endcomment %}
+    {% csrf_token %} 
+    <h2>Clock in with the current time.</h2>
+
+    <input style="background-color: dodgerblue; color: white;" type="submit" name="autoIn" class = "btn btn-primary" value = "Auto Clock In"{% if not form.clocked_in.value and form.in_time.value == None %}enabled{%else%}disabled{% endif %}/>
+
+
+    <input style="background-color: dodgerblue; color: white;" type="submit" name="lunchIn" class = "btn btn-primary" value = "Auto Lunch Clock In"{% if form.clocked_in.value == True and form.in_time.value != None and form.lunchin_time.value == None%}enabled{%else%}disabled{% endif %}/>
+
+    <input style="background-color: dodgerblue; color: white;" type="submit" name="lunchOut" class = "btn btn-primary" value = "Auto Lunch Clock Out"{% if not form.clocked_in.value == True and form.lunchin_time.value != None and form.lunchout_time.value == None %}enabled{%else%}disabled{% endif %}/>
+
+    <input style="background-color: dodgerblue; color: white;" type="submit" name="autoOut" class = "btn btn-primary" value = "Auto Clock Out"{% if form.clocked_in.value == True and form.in_time.value != None and form.out_time.value == None %}enabled{%else%}disabled{% endif %}/>
+
+    <br><br><br>
+    <br><br><br>
+    <br><br><br>
+    <h2>Use for manually entering time.</h2>
+    <p>Note: This will flag your entry as manual.</p>
+    <p>This should be used as a backup to the auto entry buttons above.</p>
+    {{form.as_p}}
+    <br>
+    <button style="background-color: dodgerblue; color: white;" type="submit" name="manual">Manual Clock In/Out</button>
+
 </form>
- {% endblock %}
+
+{% endblock %}
