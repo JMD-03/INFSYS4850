@@ -9,7 +9,7 @@ class timesAdmin(admin.ModelAdmin):
     list_per_page = 10
     readonly_fields = ['user', 'dateTimeEntered']
     def has_add_permission(self, request, obj=None):
-        return True
+        return False
 
     def has_change_permission(self, request, obj=None):
         return True

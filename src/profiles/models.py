@@ -221,8 +221,13 @@ class Request(models.Model):
                     cur_user = self.user_id
 
                     if req_type != "Time Correction":
+                        if len(str(in_time.day)) == 1:
+                            x = ("0" + str(in_time.day))
+                            setDate = (str(in_time.year) + "-" + str(in_time.month) + "-" + x)
+                        else:
+                            setDate = (str(in_time.year) + "-" + str(in_time.month) + "-" + str(in_time.day))
                         if start_date_time.day == end_date_time.day:
-                            cursor.execute("INSERT into times_timekeep (in_time,lunchin_time,lunchout_time,out_time,clocked_in,user_id,timetype,dateTimeEntered, is_Manual) VALUES(%s, NULL, NULL, %s, 0, %s, %s, curdate(), 0)", [in_time, out_time, cur_user, req_type])
+                            cursor.execute("INSERT into times_timekeep (in_time,lunchin_time,lunchout_time,out_time,clocked_in,user_id,timetype,dateTimeEntered, is_Manual) VALUES(%s, NULL, NULL, %s, 0, %s, %s, %s, 0)", [in_time, out_time, cur_user, req_type,setDate])
                         else:
                             for i in range(calc_time.days + 1):
                                 day = start_date_time + timedelta(days=i)
@@ -237,16 +242,9 @@ class Request(models.Model):
                                         out_time += x
                                     else:
                                         out_time = end_date_time
-                                    # print ("minutes: ", minutes)
-                                    # print ("day: ", day)
-                                    # print ("out time: ", out_time)
-                                    # print ("out time.hour: ", out_time.hour)
-                                    # print ("start date time.hour: ", start_date_time.hour)    
                                     minutes += ((out_time.hour*60)+out_time.minute) - ((start_date_time.hour*60) + start_date_time.minute)
                                     out_time = out_time + hours_add
-                                    # print("new Minutes: ", minutes)
-                                    cursor.execute("INSERT into times_timekeep (in_time,lunchin_time,lunchout_time,out_time,clocked_in,user_id,timetype,dateTimeEntered, is_Manual) VALUES(%s, NULL, NULL, %s, 0, %s, %s, curdate(), 0)", [in_time, out_time, cur_user, req_type])
-                                    # print("ran multi day insert")
+                                    cursor.execute("INSERT into times_timekeep (in_time,lunchin_time,lunchout_time,out_time,clocked_in,user_id,timetype,dateTimeEntered, is_Manual) VALUES(%s, NULL, NULL, %s, 0, %s, %s, %s, 0)", [in_time, out_time, cur_user, req_type,setDate])
 
 
                     else:  #req type does equal time correction so it can only be a single day.
@@ -260,7 +258,7 @@ class Request(models.Model):
                         if times.exists():
                             cursor.execute("UPDATE times_timekeep SET lunchin_time = NULL, lunchout_time = NULL, in_time = %s, out_time = %s, timeType = %s WHERE date(in_time) = date(%s) AND user_id = %s AND timeType = %s", [in_time, out_time, timeType, self.start_Date_Time, cur_user, timeType])
                         else:
-                            cursor.execute("INSERT into times_timekeep (in_time,lunchin_time,lunchout_time,out_time,clocked_in,user_id,timetype,dateTimeEntered, is_Manual) VALUES(%s, NULL, NULL, %s, 0, %s, %s, curdate(), 0)", [in_time, out_time, cur_user, timeType])
+                            cursor.execute("INSERT into times_timekeep (in_time,lunchin_time,lunchout_time,out_time,clocked_in,user_id,timetype,dateTimeEntered, is_Manual) VALUES(%s, NULL, NULL, %s, 0, %s, %s, %s, 0)", [in_time, out_time, cur_user, timeType,setDate])
 
 
                     if req_type == 'Paid Time Off':

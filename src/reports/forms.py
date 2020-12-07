@@ -31,6 +31,12 @@ class DateInput(forms.DateInput):
     input_type = 'date'
 
 class ReportselfForm(forms.Form):
+    def clean(self, *args, **kwargs):
+        cleaned_data = super().clean()
+        start_date = cleaned_data.get("start_Date")
+        end_date = cleaned_data.get("end_Date")
+        if end_date < start_date:
+            raise forms.ValidationError("End date should be greater than start date.")
 
     reports = (
         (1, ("Web-Based Report")),
@@ -48,6 +54,14 @@ class ReportselfForm(forms.Form):
 
 
 class ReportTimePull(forms.Form):
+    def clean(self, *args, **kwargs):
+        cleaned_data = super().clean()
+        start_date = cleaned_data.get("starting_Date")
+        end_date = cleaned_data.get("ending_Date")
+        print(end_date)
+        print(start_date)
+        if end_date < start_date:
+            raise forms.ValidationError("End date should be greater than start date.")
 
     reports = (
         (1, ("Web-Based Report")),
@@ -93,6 +107,13 @@ class ReportselfUserForm(forms.Form):
         self.user = kwargs.pop('user', None)
         super(ReportselfUserForm, self).__init__(*args, **kwargs)
 
+    def clean(self, *args, **kwargs):
+        cleaned_data = super().clean()
+        start_date = cleaned_data.get("start_Date")
+        end_date = cleaned_data.get("end_Date")
+        if end_date < start_date:
+            raise forms.ValidationError("End date should be greater than start date.")
+
     reports = (
         (1, ("Web-Based Report")),
         (2, ("Downloadable Report"))
@@ -109,6 +130,13 @@ class ReportTimeUserPull(forms.Form):
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user', None)
         super(ReportTimeUserPull, self).__init__(*args, **kwargs)
+
+    def clean(self, *args, **kwargs):
+        cleaned_data = super().clean()
+        start_date = cleaned_data.get("starting_Date")
+        end_date = cleaned_data.get("ending_Date")
+        if end_date < start_date:
+            raise forms.ValidationError("End date should be greater than start date.")
 
     reports = (
         (1, ("Web-Based Report")),
