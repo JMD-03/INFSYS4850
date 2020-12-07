@@ -154,12 +154,12 @@ class timeForm(forms.ModelForm):
 #                 raise forms.ValidationError("Your clock out time should be greater than clock in")
 
 def timecheck(date):
-    #if date.weekday() == 5 or date.weekday() == 6:
-     #  raise forms.ValidationError("you cannot clock in on a weekend")
+    if date.weekday() == 5 or date.weekday() == 6:
+       raise forms.ValidationError("you cannot clock in on a weekend")
     time_right_now = timezone.now()
     dater = date - time_right_now
-    #if (dater).days < -1 or (dater).days > -1:
-     #   raise forms.ValidationError("you can only clock in today")
+    if (dater).days < -1 or (dater).days > -1:
+        raise forms.ValidationError("you can only clock in today")
     if date.hour < 5 or date.hour > 23:
         raise forms.ValidationError("you must clock in between 5 am and 11 pm")
 
