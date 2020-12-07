@@ -1,0 +1,70 @@
+alter table profiles_profile add constraint check( pto_hours BETWEEN 0.0000 and 12000.0000);
+alter table profiles_profile add constraint check( sick_hours BETWEEN 0.0000 and 12000.0000);
+
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `accrue_pto_sp`()
+BEGIN
+
+	  DECLARE  v_user_id INT;
+	  DECLARE  v_pto_hours DOUBLE;
+      DECLARE  v_sick_hours      DOUBLE;
+      DECLARE  v_pto_accrual_rate    DOUBLE;
+	  DECLARE  v_sick_accrual_rate    DOUBLE;
+	  DECLARE  v_last_emp    INT DEFAULT 0;
+
+ DECLARE emp_csr CURSOR FOR
+		select user_id, pto_hours, sick_hours, pto_accrual_rate, sick_accrual_rate
+         FROM profiles_profile join auth_user on id=user_id
+        WHERE auth_user.is_active = 1
+          FOR UPDATE;
+          
+            DECLARE CONTINUE HANDLER FOR NOT FOUND SET  v_last_emp=1;
+            
+          START TRANSACTION;
+        OPEN emp_csr;
+        emp_loop:LOOP
+          FETCH emp_csr INTO  v_user_id, v_pto_hours, v_sick_hours, v_pto_accrual_rate, v_sick_accrual_rate;
+          IF  v_last_emp THEN
+            LEAVE emp_loop;
+          END IF;
+          call UPDATE_PTO_SICK(v_user_id, v_pto_hours, v_sick_hours, v_pto_accrual_rate, v_sick_accrual_rate);
+        END LOOP emp_loop;
+        CLOSE emp_csr;
+        SET  v_last_emp=0;
+
+      COMMIT;
+
+END$$
+DELIMITER ;
+
+
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `UPDATE_PTO_SICK`(v_user_id INT, v_pto_hours DOUBLE, v_sick_hours DOUBLE, v_pto_accrual_rate DOUBLE, v_sick_accrual_rate DOUBLE)
+BEGIN
+
+DECLARE EXIT HANDLER FOR 3819
+	BEGIN
+		if v_pto_hours + v_pto_accrual_rate >= 12000
+			then
+		update profiles_profile set pto_hours = 12000;
+		END IF;
+		if v_sick_hours + v_sick_accrual_rate >= 12000
+			then
+		update profiles_profile set sick_hours = 12000;
+        END IF;
+	END;
+
+update profiles_profile set pto_hours = v_pto_hours + v_pto_accrual_rate
+where user_id = v_user_id; 
+update profiles_profile set sick_hours = v_sick_hours + v_sick_accrual_rate
+where user_id = v_user_id; 
+commit;
+END$$
+DELIMITER ;
+
+CREATE EVENT bi_weekly_accrual
+    ON SCHEDULE
+      EVERY 14 DAY
+    COMMENT 'Updates employee pto and sick hours every minute'
+    DO
+     call accrue_pto_sp();
