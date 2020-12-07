@@ -221,7 +221,7 @@ def timeEdit_view(request, *args, **kwargs):
 							currentFormTimeKeep.delete()
 			return render(request, 'timeEdit.html', {'userformset': currentDayForms})
 		else:
-			currentDayForms = createWeekFormSet(request.user, timezone.now().isocalendar()[1], timezone.now()[0])
+			currentDayForms = createWeekFormSet(request.user, timezone.now().isocalendar()[1], timezone.now().isocalendar()[0])
 			return render(request, 'timeEdit.html', {'userformset': currentDayForms})
 		#def my_custom_sql(self):
 			#with connection.cursor() as cursor:
