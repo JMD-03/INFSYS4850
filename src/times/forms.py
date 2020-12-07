@@ -98,6 +98,10 @@ class timeForm(forms.ModelForm):
             if 'in_Time2' in locals() and 'lunchin_Time2' in locals() and 'lunchout_Time2' in locals():
                 if (out_Time + (lunchout_Time2 - lunchin_Time2) - in_Time2).total_seconds() > 29700:
                     raise forms.ValidationError("cannot be clocked in for over eight hours")
+            if 'lunchin_Time2' in locals() and 'lunchout_Time2' not in locals() and not lunchout_Time:
+                raise forms.ValidationError("you cannot end your lunch break without starting one")
+            if in_Time and lunchin_Time and not lunchout_Time:
+                raise forms.ValidationError("you cannot end your lunch break without starting one")
         if lunchout_Time:
             if user is None:
                 timecheck(lunchout_Time)
@@ -150,12 +154,12 @@ class timeForm(forms.ModelForm):
 #                 raise forms.ValidationError("Your clock out time should be greater than clock in")
 
 def timecheck(date):
-    if date.weekday() == 5 or date.weekday() == 6:
-        raise forms.ValidationError("you cannot clock in on a weekend")
+    #if date.weekday() == 5 or date.weekday() == 6:
+     #  raise forms.ValidationError("you cannot clock in on a weekend")
     time_right_now = timezone.now()
     dater = date - time_right_now
-    if (dater).days < -1 or (dater).days > 0:
-        raise forms.ValidationError("you can only clock in today")
+    #if (dater).days < -1 or (dater).days > -1:
+     #   raise forms.ValidationError("you can only clock in today")
     if date.hour < 5 or date.hour > 23:
         raise forms.ValidationError("you must clock in between 5 am and 11 pm")
 
