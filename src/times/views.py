@@ -110,7 +110,7 @@ def timeEntry_view(request, *args, **kwargs):
 		return render(request, 'timeEntry.html', {'form' : currentReqForm})
 	else:
 		if not current:
-			current = timeKeep(user = request.user,dateTimeEntered = timezone.now())
+			current = timeKeep(user = request.user,dateTimeEntered = timezone.now().date())
 		form = timeForm(instance = current, user = request.user)
 	return render(request, 'timeEntry.html', {'form' : form})
 
@@ -140,13 +140,27 @@ def timeEdit_view(request, *args, **kwargs):
 					break
 				if datetimeEntered == None:
 					return render(request, 'timeEdit.html', {'userformset': currentDayForms})
-				timechange = timedelta(weeks = 1)
+				weekNumberToday = datetimeEntered.isocalendar()[1]
+				print(weekNumberToday)
+				year = datetimeEntered.isocalendar()[0]
 				if 'last' in request.POST:
-					datetimeEntered -= timechange
+					weekNumberToday -= 1
+					if year > timezone.now().isocalendar()[0]:
+						weekNumberToday += 1
 				elif 'next' in request.POST:
-					datetimeEntered += timechange
+					weekNumberToday += 1
+					if weekNumberToday >= 2 and year != timezone.now().isocalendar()[0]:
+						weekNumberToday += 1
+				print("second:", weekNumberToday)
+				print(year)
+				if weekNumberToday == 0:
+					print("a")
+					weekNumberToday = 52
+					year -= 1
+				print (year)
+				print ("third",weekNumberToday)
 				user = form.cleaned_data['user']
-				currentDayForms = createWeekFormSet(user,datetimeEntered)
+				currentDayForms = createWeekFormSet(user,weekNumberToday, year)
 				return render(request, 'timeEdit.html', {'userformset': currentDayForms})
 			elif 'weeklyTimeSubmit' in request.POST:
 				for form in currentDayForms:
@@ -169,7 +183,7 @@ def timeEdit_view(request, *args, **kwargs):
 			userform = UserForm(request.POST)
 			if not userform.is_valid():
 				return render(request, 'timeEdit.html', {'form': UserForm(), 'onlyuser': True})
-			currentDayForms = createWeekFormSet(userform.cleaned_data['user'], timezone.now())
+			currentDayForms = createWeekFormSet(userform.cleaned_data['user'], timezone.now().isocalendar()[1], timezone.now().isocalendar()[0])
 			return render(request, 'timeEdit.html', {'userformset': currentDayForms})
 	else:
 		currentDayForms = timeEditFormSet(request.POST, initial = formsetInitParams, queryset = timeKeep.objects.none())
@@ -183,12 +197,13 @@ def timeEdit_view(request, *args, **kwargs):
 				break
 			if datetimeEntered == None:
 				return render(request, 'timeEdit.html', {'userformset': currentDayForms})
-			timechange = timedelta(weeks = 1)
+			weekNumberToday = datetimeEntered.isocalendar()[1]
+			year = datetimeEntered.isocalander()[0]
 			if 'last' in request.POST:
-				datetimeEntered -= timechange
+				weekNumberToday -= 1
 			elif 'next' in request.POST:
-				datetimeEntered += timechange
-			currentDayForms = createWeekFormSet(request.user,datetimeEntered)
+				weekNumberToday += 1
+			currentDayForms = createWeekFormSet(request.user,weekNumberToday,year)
 			return render(request, 'timeEdit.html', {'userformset': currentDayForms})
 		elif 'weeklyTimeSubmit' in request.POST:
 			for form in currentDayForms:
@@ -204,27 +219,29 @@ def timeEdit_view(request, *args, **kwargs):
 					if currentFormTimeKeep.in_time is None:
 							currentFormTimeKeep.delete()
 			return render(request, 'timeEdit.html', {'userformset': currentDayForms})
-		currentDayForms = createWeekFormSet(request.user, timezone.now())
-		return render(request, 'timeEdit.html', {'userformset': currentDayForms})
+		else:
+			currentDayForms = createWeekFormSet(request.user, timezone.now().isocalendar()[1], timezone.now()[0])
+			return render(request, 'timeEdit.html', {'userformset': currentDayForms})
 		#def my_custom_sql(self):
 			#with connection.cursor() as cursor:
 				#cursor.execute("SELECT in_time FROM times_timekeep WHERE in_time BETWEEN 2020-11-24 AND 2020-11-31")
 				#cursor.fetchall()
 
-def createWeekFormSet(user, datetimeEntered):
+def createWeekFormSet(user, weekNumberToday, year):
 	#year = timezone.now().isocalendar()[0]
-	# if weekNumberToday == 54:
+	# if weekNumberToday == 0:
 	# 	print("a")
-	# 	weekNumberToday = 0
-	# 	year += 1
-	# 	print(year)
-	# elif weekNumberToday == 0:
-	# 	print("b")
-	# 	weekNumberToday = 1
+	# 	weekNumberToday = 53
 	# 	year -= 1
-	year, weekNumberToday, _ = datetimeEntered.isocalendar()
-	datesToDisplay = [datetimeEntered + timedelta(days = i) for i in range(1, 6)]
-	# datesToDisplay = [datetime.strptime(f'{year}-W{weekNumberToday - 1}-{i}', "%Y-W%W-%w") for i in range (1,6)]
+	# elif weekNumberToday == 54:
+	#  	print("b")
+	#  	weekNumberToday = 1
+	#  	year += 1
+	#year, weekNumberToday, _ = datetimeEntered.isocalendar()
+	#datesToDisplay = [datetimeEntered + timedelta(days = i) for i in range(1, 6)]\\
+	print (year)
+	print (weekNumberToday)
+	datesToDisplay = [datetime.strptime(f'{year}-W{weekNumberToday - 1}-{i}', "%Y-W%W-%w") for i in range (1,6)]
 	formsetInitParams = []
 	for date in datesToDisplay:
 		param = None
