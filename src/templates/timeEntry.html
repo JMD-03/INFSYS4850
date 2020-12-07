@@ -98,20 +98,19 @@
 </div>
 <form method="post">
     {% csrf_token %}
-    {%now 'w' as var1%}
-    {%if var1 == 1 or var1 == 2 or var1 == 3 or var1 == 4 or var1 == 5%} 
-    <h2>Clock in with the current time.</h2>
-    
+    {% now 'w' as var1 %}
+    {% if var1 == "1" or var1 == "2" or var1 == "3" or var1 == "4" or var1 == "5" %} 
+        <h2>Clock in with the current time.</h2>
 
-    <input style="background-color: dodgerblue; color: white;" type="submit" name="autoIn" class = "btn btn-primary" value = "Auto Clock In"{% if not form.clocked_in.value and form.in_time.value == None %}enabled{%else%}disabled{% endif %}/>
+        <input style="background-color: dodgerblue; color: white;" type="submit" name="autoIn" class = "btn btn-primary" value = "Auto Clock In"{% if not form.clocked_in.value and form.in_time.value == None %}enabled{%else%}disabled{% endif %}/>
 
 
-    <input style="background-color: dodgerblue; color: white;" type="submit" name="lunchIn" class = "btn btn-primary" value = "Auto Lunch Clock In"{% if form.clocked_in.value == True and form.in_time.value != None and form.lunchin_time.value == None%}enabled{%else%}disabled{% endif %}/>
+        <input style="background-color: dodgerblue; color: white;" type="submit" name="lunchIn" class = "btn btn-primary" value = "Auto Lunch Clock In"{% if form.clocked_in.value == True and form.in_time.value != None and form.lunchin_time.value == None%}enabled{%else%}disabled{% endif %}/>
 
-    <input style="background-color: dodgerblue; color: white;" type="submit" name="lunchOut" class = "btn btn-primary" value = "Auto Lunch Clock Out"{% if not form.clocked_in.value == True and form.lunchin_time.value != None and form.lunchout_time.value == None %}enabled{%else%}disabled{% endif %}/>
+        <input style="background-color: dodgerblue; color: white;" type="submit" name="lunchOut" class = "btn btn-primary" value = "Auto Lunch Clock Out"{% if not form.clocked_in.value == True and form.lunchin_time.value != None and form.lunchout_time.value == None %}enabled{%else%}disabled{% endif %}/>
 
-    <input style="background-color: dodgerblue; color: white;" type="submit" name="autoOut" class = "btn btn-primary" value = "Auto Clock Out"{% if form.clocked_in.value == True and form.in_time.value != None and form.out_time.value == None %}enabled{%else%}disabled{% endif %}/>
-    <br><br><br>
+        <input style="background-color: dodgerblue; color: white;" type="submit" name="autoOut" class = "btn btn-primary" value = "Auto Clock Out"{% if form.clocked_in.value == True and form.in_time.value != None and form.out_time.value == None %}enabled{%else%}disabled{% endif %}/>
+        <br><br><br>
     {% endif %}
     {{form.as_p}}
     <h2>Use for manually entering time.</h2>
