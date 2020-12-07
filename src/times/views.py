@@ -239,9 +239,7 @@ def createWeekFormSet(user, weekNumberToday, year):
 	#  	weekNumberToday = 1
 	#  	year += 1
 	#year, weekNumberToday, _ = datetimeEntered.isocalendar()
-	#datesToDisplay = [datetimeEntered + timedelta(days = i) for i in range(1, 6)]\\
-	print (year)
-	print (weekNumberToday)
+	#datesToDisplay = [datetimeEntered + timedelta(days = i) for i in range(1, 6)]
 	datesToDisplay = [datetime.strptime(f'{year}-W{weekNumberToday - 1}-{i}', "%Y-W%W-%w") for i in range (1,6)]
 	formsetInitParams = []
 	for date in datesToDisplay:
