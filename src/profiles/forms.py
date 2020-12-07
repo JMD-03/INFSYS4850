@@ -6,8 +6,6 @@ from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 from .models import Profile, Request
 
-#import logging
-
 
 class UserForm(UserCreationForm):
     email = forms.EmailField(required=True)
@@ -78,13 +76,14 @@ class RequestForm(forms.ModelForm):
         self.user = kwargs.pop('user', None)
         super(RequestForm, self).__init__(*args, **kwargs)
 
+
     class Meta:
         widgets = {'start_Date_Time': DateTimeInput(format='%Y-%m-%d %H:%M'),   # widget creates html date picker combined with above datetimeinput class
                    'end_Date_Time':   DateTimeInput(format='%Y-%m-%d %H:%M'),}
         model = Request
         fields = ('request_Type', 'start_Date_Time', 'end_Date_Time')
 
-    def clean(self):
+    def clean(self, *args, **kwargs):
         cleaned_data = super().clean()
         reqType = cleaned_data.get("request_Type")
         start_date_time = cleaned_data.get("start_Date_Time")
@@ -104,36 +103,34 @@ class RequestForm(forms.ModelForm):
             raise forms.ValidationError("Start and end time can not match.")
         if (old_req.days > 14):
             raise forms.ValidationError("You can't submit a request for more than two weeks in the past. Please talk directly to management about this request.")
+        if (end_date_time.hour + (end_date_time.minute/60)) - (start_date_time.hour + (start_date_time.minute/60)) > 8:
+            raise forms.ValidationError("The start and end times of this request are more than 8 hours apart. You can't have over 8 hours between the starting and ending times (the hours and minutes fields).")
 
-        if (reqType == "Paid Time Off Request"):
-            pto = prof.PTO_Hours# * 60                                       # Get PTO hours, is already in minutes in database
-            print("total days: ", total_days)
-            print("calc_time: ", calc_time.days)
-            print("remain_time: ", remain_time)
-            print(start_date_time.weekday())
-            print(end_date_time.weekday())
-
+        if (reqType == "Paid Time Off" or reqType == "Sick Day"):
+            if reqType == "Paid Time Off":
+                shours = prof.PTO_Hours
+                if start_date_time < now():
+                    raise forms.ValidationError("You can't submit this request for a day in the past.")
+            elif reqType == "Sick Day":
+                shours = prof.Sick_Hours
             if (start_date_time.weekday() >= 5):
                 raise forms.ValidationError("Your start or end date can not be a weekend.")
             if (end_date_time.weekday() >= 5):
                 raise forms.ValidationError("Your start or end date can not be a weekend.")
             if (calc_time.days == 0 and start_date_time.day == end_date_time.day):         # Check if this is a single day request
                 day = start_date_time + timedelta(days=calc_time.days)
-                print(day)
                 if (day.weekday() < 5):
                     if (minutes/60) > 8:                                       
-                        raise forms.ValidationError("You can not request over 8 hours of PTO for a single day.")
+                        raise forms.ValidationError("You can not request over 8 hours of time for a single day.")
                     if (minutes + remain_time < 60):
                         raise forms.ValidationError("Minimum request time is one hour.")
-                    if (pto < minutes):                                         
-                        raise forms.ValidationError("You do not have enough PTO to cover this request 1.")
+                    if (shours < minutes):                                         
+                        raise forms.ValidationError("You do not have enough banked time to cover this request 1.")
                 else:
-                    raise forms.ValidationError("Your are submitting a single day PTO request for a weekend")
+                    raise forms.ValidationError("Your are submitting a single day request for a weekend")
             
             elif (calc_time.days == 0 and start_date_time.day != end_date_time.day):
-                raise forms.ValidationError("Please check your timing. You have entered a multiple day request with less than 24 hours separating the entries.")
-            # elif (calc_time.days > 7):
-            #     raise forms.ValidationError("PTO Requests must be put in at less than 1 week increments.")
+                raise forms.ValidationError("For multi day requests you must put exactly 8 hours between the starting hours/minutes and the ending hours/minutes. (ex. 8am-4pm). If you are attempting to take a partial day with full days on the front or back of the request please use two requests. One for the partial day, and another for the full days.")
             elif ((start_date_time.minute not in [0,15,30,45]) or (end_date_time.minute not in [0,15,30,45])):
                 raise forms.ValidationError("Your start and end time must utilize 15 minute increments(0,15,30,45).")
             elif (end_date_time.hour > 23):
@@ -142,153 +139,184 @@ class RequestForm(forms.ModelForm):
                 raise forms.ValidationError("Start and end times for this request must be between 5am and 11pm.")
             else:
                 total_days = 0
-                print("calcTime.days ", calc_time.days)
-                if calc_time.days == 1:
-                    for i in range(calc_time.days):
-                        day = start_date_time + timedelta(days=i)
-                        print(day)
-                        if (day.weekday() < 5):
-                            if remain_time == 0:
-                                total_days += 1
-                                print("added 1 to total days")
-                                minutes = ((total_days * 8) * 60)
-                            else:
-                                total_days += 1
-                                minutes = remain_time // 60
-                                minutes += ((total_days * 8) * 60)
-                                print("added 1 to total days in else")
-                        else:
-                            raise forms.ValidationError("Please don't put in PTO for weekends.")
-                else:        
-                    for i in range(calc_time.days + 1):
-                        day = start_date_time + timedelta(days=i)
-                        print(day)
-                        if (remain_time == 0):
-                            if (day.weekday() < 5):
-                                total_days += 1
-                                print("ran if")
-                        else:
-                            if (day.weekday() < 5):
-                                total_days += 1
-                                minutes = remain_time // 60
-                                print("ran else")
-                    if (minutes != (seconds // 60)):
-                        minutes += ((total_days * 8) * 60)
-                        print("set minutes +=")
-                    else:
-                        minutes = ((total_days * 8) * 60)                             
-                        print("set minutes in else")
-                print("minutes ", minutes)
-                print("pto time: ", pto)
-                print("total days: ", total_days)
-                if (pto < minutes):                                     
-                    raise forms.ValidationError("You do not have enough PTO to cover this request 2.")
-                else:
-                    if minutes == 0:
-                        raise forms.ValidationError("You've submitted a request only for a weekend. If this is a request spanning multiple weeks please use two requests.")
-                    else:
+                if (end_date_time.hour + (end_date_time.minute/60)) - (start_date_time.hour + (start_date_time.minute/60)) != 8:
+                    raise forms.ValidationError("For multi day requests you must put exactly 8 hours between the starting hours/minutes and the ending hours/minutes. (ex. 8am-4pm). If you are attempting to take a partial day with full days on the front or back of the request please use two requests. One for the partial day, and another for the full days.")
+                for i in range(calc_time.days + 1):
+                    day = start_date_time + timedelta(days=i)
+                    if (day.weekday() >= 5):
                         pass
-                print("total time off: ", minutes)
-            print("total time off: ", minutes)
-
-        elif (reqType == "Sick Day Request"):
-            sick = prof.Sick_Hours# * 60                                       # Get sick hours, is already in minutes in database
-            print("total days: ", total_days)
-            print("calc_time: ", calc_time.days)
-            print("remain_time: ", remain_time)
-            print(start_date_time.weekday())
-            print(end_date_time.weekday())
-
-            if (start_date_time.weekday() >= 5):
-                raise forms.ValidationError("Your start or end date can not be a weekend.")
-            if (end_date_time.weekday() >= 5):
-                raise forms.ValidationError("Your start or end date can not be a weekend.")
-            if (calc_time.days == 0 and start_date_time.day == end_date_time.day):         # Check if this is a single day request
-                day = start_date_time + timedelta(days=calc_time.days)
-                print(day)
-                if (day.weekday() < 5):
-                    if (minutes/60) > 8:                                       
-                        raise forms.ValidationError("You can not request over 8 hours of sick time for a single day.")
-                    if (minutes + remain_time < 60):
-                        raise forms.ValidationError("Minimum request time is one hour.")
-                    if (sick < minutes):                                         
-                        raise forms.ValidationError("You do not have enough sick time to cover this request 1.")
-                else:
-                    raise forms.ValidationError("You're submitting a single day sick day request for a weekend")
-            
-            elif (calc_time.days == 0 and start_date_time.day != end_date_time.day):
-                raise forms.ValidationError("Please check your timing. You have entered a multiple day request with less than 24 hours separating the entries.")
-            # elif (calc_time.days > 7):
-            #     raise forms.ValidationError("PTO Requests must be put in at less than 1 week increments.")
-            elif ((start_date_time.minute not in [0,15,30,45]) or (end_date_time.minute not in [0,15,30,45])):
-                raise forms.ValidationError("Your start and end time must utilize 15 minute increments(0,15,30,45).")
-            elif (end_date_time.hour > 23):
-                raise forms.ValidationError("Start and end times for this request must be between 5am and 11pm.")
-            elif (start_date_time.hour < 5 or start_date_time.hour > 23):
-                raise forms.ValidationError("Start and end times for this request must be between 5am and 11pm.")
-            else:
-                total_days = 0
-                print("calcTime.days ", calc_time.days)
-                if calc_time.days == 1:
-                    for i in range(calc_time.days):
-                        day = start_date_time + timedelta(days=i)
-                        print(day)
-                        if (day.weekday() < 5):
-                            if remain_time == 0:
-                                total_days += 1
-                                print("added 1 to total days")
-                                minutes = ((total_days * 8) * 60)
-                            else:
-                                total_days += 1
-                                minutes = remain_time // 60
-                                minutes += ((total_days * 8) * 60)
-                                print("added 1 to total days in else")
-                        else:
-                            raise forms.ValidationError("Please don't put in sick time for weekends.")
-                else:        
-                    for i in range(calc_time.days + 1):
-                        day = start_date_time + timedelta(days=i)
-                        print(day)
-                        if (remain_time == 0):
-                            if (day.weekday() < 5):
-                                total_days += 1
-                                print("ran if")
-                        else:
-                            if (day.weekday() < 5):
-                                total_days += 1
-                                minutes = remain_time // 60
-                                print("ran else")
-                    if (minutes != (seconds // 60)):
-                        minutes += ((total_days * 8) * 60)
-                        print("set minutes +=")
                     else:
-                        minutes = ((total_days * 8) * 60)                             
-                        print("set minutes in else")
-                print("minutes ", minutes)
-                print("sick time: ", sick)
-                print("total days: ", total_days)
-                if (sick < minutes):                                     
-                    raise forms.ValidationError("You do not have enough sick time to cover this request 2.")
-                else:
-                    if minutes == 0:
-                        raise forms.ValidationError("You've submitted a request only for a weekend. If this is a request spanning multiple weeks please use two requests.")
-                    else:
-                        pass
-                print("total time off: ", minutes)
-            print("total time off: ", minutes)
+                        total_days += 1
+                        minutes = ((total_days * 8) * 60)
+                if shours < minutes:
+                    raise forms.ValidationError("You don't have enough time banked to cover this request.")
+                elif minutes == 0:
+                    raise forms.ValidationError("You've managed to put in a request for only a weekend. That's not valid! Please add some weekdays to this request.")
 
-        elif (reqType == "Overtime Request"):
-            print("total days: ", total_days)
-            print("calc_time: ", calc_time.days)
-            print("remain_time: ", remain_time)
+        elif reqType == "Overtime":
+            if (end_date_time.hour + (end_date_time.minute/60)) - (start_date_time.hour + (start_date_time.minute/60)) > 8:
+                raise forms.ValidationError("The start and end times of this request are more than 8 hours apart. You can't have over 8 hours between the starting and ending times (the hours and minutes fields).")
             if ((start_date_time.day != end_date_time.day) or (start_date_time.month != end_date_time.month) or (start_date_time.year != end_date_time.year)):
                 raise forms.ValidationError("You can not enter an overtime request with different start and end dates")
 
-        elif (reqType == "Time Correction Request"):
-            print("total days: ", total_days)
-            print("calc_time: ", calc_time.days)
-            print("remain_time: ", remain_time)
+        elif reqType == "Time Correction":
+            if (end_date_time.hour + (end_date_time.minute/60)) - (start_date_time.hour + (start_date_time.minute/60)) > 8:
+                raise forms.ValidationError("The start and end times of this request are more than 8 hours apart. You can't have over 8 hours between the starting and ending times (the hours and minutes fields).")
+            if start_date_time > now():
+                raise forms.ValidationError("You can't correct a future time.")
             if ((start_date_time.day != end_date_time.day) or (start_date_time.month != end_date_time.month) or (start_date_time.year != end_date_time.year)):
                 raise forms.ValidationError("A time correction request must be put in for only a single day")
+            
         else:
             raise forms.ValidationError("Unknown error while getting request type. Please relaunch this website and try again. If the issue repeats please contact management.")
+
+
+
+        # if (reqType == "Paid Time Off"):
+        #     pto = prof.PTO_Hours
+        #     if (end_date_time.hour + (end_date_time.minute/60)) < (start_date_time.hour + (start_date_time.minute/60)):
+        #         raise forms.ValidationError("The hour and minute combination of the ending time can not be less than the starting time hour/minute combination.")     
+        #     if start_date_time < now():
+        #         raise forms.ValidationError("You can't submit this request for a time in the past.")
+        #     if (end_date_time.hour + (end_date_time.minute/60)) - (start_date_time.hour + (start_date_time.minute/60)) > 8:
+        #         raise forms.ValidationError("Your start and end times are more than 8 hours apart. You can't have over 8 hours between the start and end time.")
+        #     if (start_date_time.weekday() >= 5):
+        #         raise forms.ValidationError("Your start or end date can not be a weekend.")
+        #     if (end_date_time.weekday() >= 5):
+        #         raise forms.ValidationError("Your start or end date can not be a weekend.")
+        #     if (calc_time.days == 0 and start_date_time.day == end_date_time.day):         # Check if this is a single day request
+        #         day = start_date_time + timedelta(days=calc_time.days)
+        #         if (day.weekday() < 5):
+        #             if (minutes/60) > 8:                                       
+        #                 raise forms.ValidationError("You can not request over 8 hours of PTO for a single day.")
+        #             if (minutes + remain_time < 60):
+        #                 raise forms.ValidationError("Minimum request time is one hour.")
+        #             if (pto < minutes):                                         
+        #                 raise forms.ValidationError("You do not have enough PTO to cover this request 1.")
+        #         else:
+        #             raise forms.ValidationError("Your are submitting a single day PTO request for a weekend")
+            
+        #     elif (calc_time.days == 0 and start_date_time.day != end_date_time.day):
+        #         raise forms.ValidationError("Please check your timing. You have entered a multiple day request with less than 24 hours separating the entries.")
+        #     elif ((start_date_time.minute not in [0,15,30,45]) or (end_date_time.minute not in [0,15,30,45])):
+        #         raise forms.ValidationError("Your start and end time must utilize 15 minute increments(0,15,30,45).")
+        #     elif (end_date_time.hour > 23):
+        #         raise forms.ValidationError("Start and end times for this request must be between 5am and 11pm.")
+        #     elif (start_date_time.hour < 5 or start_date_time.hour > 23):
+        #         raise forms.ValidationError("Start and end times for this request must be between 5am and 11pm.")
+        #     else:
+        #         total_days = 0
+        #         if calc_time.days == 1:
+        #             for i in range(calc_time.days + 1):
+        #                 day = start_date_time + timedelta(days=i)
+        #                 if (day.weekday() < 5):
+        #                     if remain_time == 0:
+        #                         total_days += 1
+        #                         print("added 1 to total days")
+        #                         minutes = ((total_days * 8) * 60)
+        #                     else:
+        #                         total_days += 1
+        #                         minutes = remain_time // 60
+        #                         minutes += ((total_days * 8) * 60)
+        #                         print("added 1 to total days in else")
+        #                 else:
+        #                     raise forms.ValidationError("Please don't put in PTO for weekends.")
+        #         else:        
+        #             for i in range(calc_time.days + 1):
+        #                 day = start_date_time + timedelta(days=i)
+        #                 if (remain_time == 0):
+        #                     if (day.weekday() < 5):
+        #                         total_days += 1
+        #                 else:
+        #                     if (day.weekday() < 5):
+        #                         total_days += 1
+        #                         minutes = remain_time // 60
+        #             if (minutes != (seconds // 60)):
+        #                 minutes += ((total_days * 8) * 60)
+        #             else:
+        #                 minutes = ((total_days * 8) * 60)                             
+        #         if (pto < minutes):                                     
+        #             raise forms.ValidationError("You do not have enough PTO to cover this request 2.")
+        #         else:
+        #             if minutes == 0:
+        #                 raise forms.ValidationError("You've submitted a request only for a weekend. If this is a request spanning multiple weeks please use two requests.")
+        #             else:
+        #                 pass
+
+
+        # elif (reqType == "Sick Day"):
+        #     sick = prof.Sick_Hours                                       # Get sick hours, is already in minutes in database
+        #     if (end_date_time.hour + (end_date_time.minute/60)) < (start_date_time.hour + (start_date_time.minute/60)):
+        #         raise forms.ValidationError("The hour and minute combination of the ending time can not be less than the starting time hour/minute combination.")  
+        #     if (end_date_time.hour + (end_date_time.minute/60)) - (start_date_time.hour + (start_date_time.minute/60)) > 8:
+        #         raise forms.ValidationError("Your start and end times are more than 8 hours apart. You can't have over 8 hours between the start and end time.")
+        #     if (start_date_time.weekday() >= 5):
+        #         raise forms.ValidationError("Your start or end date can not be a weekend.")
+        #     if (end_date_time.weekday() >= 5):
+        #         raise forms.ValidationError("Your start or end date can not be a weekend.")
+        #     if (calc_time.days == 0 and start_date_time.day == end_date_time.day):         # Check if this is a single day request
+        #         day = start_date_time + timedelta(days=calc_time.days)
+        #         if (day.weekday() < 5):
+        #             if (minutes/60) > 8:                                       
+        #                 raise forms.ValidationError("You can not request over 8 hours of sick time for a single day.")
+        #             if (minutes + remain_time < 60):
+        #                 raise forms.ValidationError("Minimum request time is one hour.")
+        #             if (sick < minutes):                                         
+        #                 raise forms.ValidationError("You do not have enough sick time to cover this request 1.")
+        #         else:
+        #             raise forms.ValidationError("You're submitting a single day sick day request for a weekend")  
+        #     elif (calc_time.days == 0 and start_date_time.day != end_date_time.day):
+        #         raise forms.ValidationError("Please check your timing. You have entered a multiple day request with less than 24 hours separating the entries.")
+        #     elif ((start_date_time.minute not in [0,15,30,45]) or (end_date_time.minute not in [0,15,30,45])):
+        #         raise forms.ValidationError("Your start and end time must utilize 15 minute increments(0,15,30,45).")
+        #     elif (end_date_time.hour > 23):
+        #         raise forms.ValidationError("Start and end times for this request must be between 5am and 11pm.")
+        #     elif (start_date_time.hour < 5 or start_date_time.hour > 23):
+        #         raise forms.ValidationError("Start and end times for this request must be between 5am and 11pm.")
+        #     else:
+        #         total_days = 0
+        #         if calc_time.days == 1:
+        #             for i in range(calc_time.days +1):
+        #                 day = start_date_time + timedelta(days=i)
+        #                 if (day.weekday() < 5):
+        #                     if remain_time == 0:
+        #                         total_days += 1
+        #                         minutes = ((total_days * 8) * 60)
+        #                     else:
+        #                         total_days += 1
+        #                         minutes = remain_time // 60
+        #                         minutes += ((total_days * 8) * 60)
+        #                 else:
+        #                     raise forms.ValidationError("Please don't put in sick time for weekends.")
+        #         else:        
+        #             for i in range(calc_time.days + 1):
+        #                 day = start_date_time + timedelta(days=i)
+        #                 if (remain_time == 0):
+        #                     if (day.weekday() < 5):
+        #                         total_days += 1
+        #                 else:
+        #                     if (day.weekday() < 5):
+        #                         total_days += 1
+        #                         minutes = remain_time // 60
+        #             if (minutes != (seconds // 60)):
+        #                 minutes += ((total_days * 8) * 60)
+        #             else:
+        #                 minutes = ((total_days * 8) * 60)                             
+        #         if (sick < minutes):                                     
+        #             raise forms.ValidationError("You do not have enough sick time to cover this request 2.")
+        #         else:
+        #             if minutes == 0:
+        #                 raise forms.ValidationError("You've submitted a request only for a weekend. If this is a request spanning multiple weeks please use two requests.")
+        #             else:
+        #                 pass
+
+        # elif (reqType == "Overtime"):
+        #     if ((start_date_time.day != end_date_time.day) or (start_date_time.month != end_date_time.month) or (start_date_time.year != end_date_time.year)):
+        #         raise forms.ValidationError("You can not enter an overtime request with different start and end dates")
+
+        # elif (reqType == "Time Correction"):
+        #     if start_date_time > now():
+        #         raise forms.ValidationError("You can't correct a future time.")
+        #     if ((start_date_time.day != end_date_time.day) or (start_date_time.month != end_date_time.month) or (start_date_time.year != end_date_time.year)):
+        #         raise forms.ValidationError("A time correction request must be put in for only a single day")
+
