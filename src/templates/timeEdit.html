@@ -123,7 +123,7 @@
                 {{ forloop.counter1 }}
             </p>
             <p>
-                {{ form.dateTimeEntered.value }}
+                {{ form.dateTimeEntered.value | date:"F d Y"}}
             </p>
         </th>
         {% endfor %}
