@@ -116,10 +116,10 @@ def timeEntry_view(request, *args, **kwargs):
 
 def getTimeKeepFromKeys(user, timeType, date, create = False):
 	try:
-		return timeKeep.objects.filter(user = user, timeType = timeType).get(dateTimeEntered = date.date())
+		return timeKeep.objects.filter(user = user, timeType = timeType).get(dateTimeEntered = date)
 	except timeKeep.DoesNotExist:
 		if create:
-			return timeKeep.objects.create(user = user, timeType = timeType, dateTimeEntered = date.date())
+			return timeKeep.objects.create(user = user, timeType = timeType, dateTimeEntered = date)
 	except timeKeep.MultipleObjectsReturned:
 		return "MultiObj"
 	return None
