@@ -1,4 +1,4 @@
-from times.forms import timeForm, UserForm
+		from times.forms import timeForm, UserForm
 from django.forms import HiddenInput, TimeInput, DateTimeInput
 from times.models import timeKeep
 from django.forms import modelformset_factory, model_to_dict
@@ -141,7 +141,6 @@ def timeEdit_view(request, *args, **kwargs):
 				if datetimeEntered == None:
 					return render(request, 'timeEdit.html', {'userformset': currentDayForms})
 				weekNumberToday = datetimeEntered.isocalendar()[1]
-				print(weekNumberToday)
 				year = datetimeEntered.isocalendar()[0]
 				if 'last' in request.POST:
 					weekNumberToday -= 1
@@ -149,16 +148,11 @@ def timeEdit_view(request, *args, **kwargs):
 						weekNumberToday += 1
 				elif 'next' in request.POST:
 					weekNumberToday += 1
-					if weekNumberToday >= 2 and year != timezone.now().isocalendar()[0]:
+					if weekNumberToday >= 2 and year > timezone.now().isocalendar()[0]:
 						weekNumberToday += 1
-				print("second:", weekNumberToday)
-				print(year)
 				if weekNumberToday == 0:
-					print("a")
 					weekNumberToday = 52
 					year -= 1
-				print (year)
-				print ("third",weekNumberToday)
 				user = form.cleaned_data['user']
 				currentDayForms = createWeekFormSet(user,weekNumberToday, year)
 				return render(request, 'timeEdit.html', {'userformset': currentDayForms})
@@ -198,11 +192,18 @@ def timeEdit_view(request, *args, **kwargs):
 			if datetimeEntered == None:
 				return render(request, 'timeEdit.html', {'userformset': currentDayForms})
 			weekNumberToday = datetimeEntered.isocalendar()[1]
-			year = datetimeEntered.isocalander()[0]
+			year = datetimeEntered.isocalendar()[0]
 			if 'last' in request.POST:
 				weekNumberToday -= 1
+				if year > timezone.now().isocalendar()[0]:
+					weekNumberToday += 1
 			elif 'next' in request.POST:
 				weekNumberToday += 1
+				if weekNumberToday >= 2 and year > timezone.now().isocalendar()[0]:
+					weekNumberToday += 1
+			if weekNumberToday == 0:
+				weekNumberToday = 52
+				year -= 1
 			currentDayForms = createWeekFormSet(request.user,weekNumberToday,year)
 			return render(request, 'timeEdit.html', {'userformset': currentDayForms})
 		elif 'weeklyTimeSubmit' in request.POST:
