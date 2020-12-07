@@ -3,6 +3,9 @@
 {%include 'navbar.html'%}
 <head>
     <style>
+    h2 {
+        text-align: center;
+    }
         .help-tip{
     position: absolute;
     top: 80px;
@@ -89,42 +92,60 @@
 </head>
 <div class="help-tip">
     <p>
-        *<b>Auto Clock In:</b> Click this button to use the current time as your Clock in Timestamp<br>
-        *<b>Auto Lunch Start:</b> Click this button to use the current time as the start of your lunch break<br>
-        *<b>Auto Lunch End:</b> Click this button to use the current time as the end of your lunch break<br>
-        *<b>Auto Clock Out:</b> Click this button to use the current time as your Clock out Timestamp<br>
-        *<b>Manual Clock In/Out</b> This button should only be used when you have forgotten to make a time stamp, first enter the time in the field that you missed (Clock In, Lunch Start, Lunch End, or Clock Out) and then click this button for that time to be reported.
+<b>*Previous Week:</b> This button will allow you to view the previous weeks time entries<br>
+<b>*Next Week:</b> This button will allow for you to view the next weeks time entries<br>
+{% if request.user.is_staff%}
+<b>*Select Employee:</b> This drop down menu will allow you to select the employee whose time needs to be edited.<br>
+<b>*Submit:</b> This button will allow you to view the selected employees time entries for the current week<br>
+<b>*Adjusting Time:</b> Click in the field with the missing time entry, or wrong time entry, and create the new time by using the widget<br>
+<b>*Submit:</b> Use this button to save all of the edits made to the employees time sheet<br>
+{%endif%}
     </p>
-</div>
+  </div>
 <form method="post">
-    {% csrf_token %}
-    {% now 'w' as var1 %}
-    {% if var1 == "1" or var1 == "2" or var1 == "3" or var1 == "4" or var1 == "5" %} 
-        <h2>Clock in with the current time.</h2>
-
-        <input style="background-color: dodgerblue; color: white;" type="submit" name="autoIn" class = "btn btn-primary" value = "Auto Clock In"{% if not form.clocked_in.value and form.in_time.value == None %}enabled{%else%}disabled{% endif %}/>
-
-
-        <input style="background-color: dodgerblue; color: white;" type="submit" name="lunchIn" class = "btn btn-primary" value = "Auto Lunch Clock In"{% if form.clocked_in.value == True and form.in_time.value != None and form.lunchin_time.value == None%}enabled{%else%}disabled{% endif %}/>
-
-        <input style="background-color: dodgerblue; color: white;" type="submit" name="lunchOut" class = "btn btn-primary" value = "Auto Lunch Clock Out"{% if not form.clocked_in.value == True and form.lunchin_time.value != None and form.lunchout_time.value == None %}enabled{%else%}disabled{% endif %}/>
-
-        <input style="background-color: dodgerblue; color: white;" type="submit" name="autoOut" class = "btn btn-primary" value = "Auto Clock Out"{% if form.clocked_in.value == True and form.in_time.value != None and form.out_time.value == None %}enabled{%else%}disabled{% endif %}/>
-        <br><br><br>
-    {% endif %}
+    {% csrf_token %} 
+    {% if onlyuser and request.user.is_staff%}
     {{form.as_p}}
-    <h2>Use for manually entering time.</h2>
-    <p>Note: This will flag your entry as manual.</p>
-    <p>This should be used as a backup to the auto entry buttons above.</p>
-    <br>
-    <button style="background-color: dodgerblue; color: white;" type="submit" name="manual">Manual Clock In/Out</button>
+    <button type="submit" name = "userSub">submit</button>
+    {% else %}
+    {% if request.user.is_staff%}
+    <h2> Time Edit </h2>
+    {% else %}
+    <h2> Time View </h2>
+    {% endif %}
+    {{ userformset.management_form }}
+    <table>
+    <thead>
+    <tr>
+        {% for form in userformset %}
+        <th>
+            <p>
+                {{ forloop.counter1 }}
+            </p>
+            <p>
+                {{ form.dateTimeEntered.value | date:"F d Y" }}
+            </p>
+        </th>
+        {% endfor %}
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        {% for form in userformset %}
+        <td>
+        {{ form.as_p }}
+        </td>
+        {% endfor %}
+    </tr>
+    </tbody>
+    </table>
 
+    
+    <button type="submit" style="background-color: dodgerblue; color: white;" name="last">Last Week</button>
+    <button type="submit" style="background-color: dodgerblue; color: white;" name="next">Next Week</button>
+    {% if request.user.is_staff %}
+    <button type="submit" style="background-color: dodgerblue; color: white;" name="weeklyTimeSubmit">submit</button>
+    {% endif %}
+    {% endif %}
 </form>
-{% if messages %}
-    {% for message in messages %}
-        {% if message.tags == 'success'%}
-            <li>{{message}}</li>
-        {% endif %}
-    {% endfor %}
-{% endif %}
-{% endblock %}
+ {% endblock %}
