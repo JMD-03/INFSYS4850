@@ -12,7 +12,7 @@ class timeKeep(models.Model):
 
 	class timeType(models.TextChoices):
 		Paid_Time_Off = 'Paid Time Off'
-		Sick_Day = 'Sick Time'
+		Sick_Day = 'Sick Day'
 		Overtime = 'Overtime'
 		Standardtime = 'Standard Time'
 		
@@ -32,8 +32,6 @@ class timeKeep(models.Model):
 
 	clocked_in = models.BooleanField(default = False)
 	
-	#is_Manual = models.BooleanField(default = False)
+	is_Manual = models.BooleanField(default = False)
 
-	dateTimeEntered = models.DateField(default = timezone.now)
-	#class Meta:
-	#	constraints = [models.UniqueConstraint(fields=['user', 'dateTimeEntered'], name='unique user date')]
+	dateTimeEntered = models.DateField(default = None, null = True)

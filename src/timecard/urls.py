@@ -20,9 +20,9 @@ from django.contrib.auth import urls
 
 #from pages.views import signon_view
 from times.views import timeEntry_view, timeEdit_view
-from reports.views import reports_view, reports_webview
+from reports.views import reports_view, reportsUser_view
 from profiles.views import profileCreation_view, requests_view
-from pages.views import redirect_login
+from pages.views import redirect_login, change_password
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -31,10 +31,15 @@ urlpatterns = [
     path('profileCreation/', profileCreation_view, name='profileCreation'),
     path('requests/', requests_view, name='requests'),
     path('timeEdit/', timeEdit_view,name='timeEdit'),
-    path('reports_webview/', reports_webview,name='reports_webview'),
-    path('', redirect_login, name='redirect')
+    path('', redirect_login, name='redirect'),
+    path('change_password', change_password, name ='change_password'),
+    path('userReports/', reportsUser_view, name='userReports')
 ]
 
 urlpatterns += [
     path('accounts/', include('django.contrib.auth.urls')),
 ]
+
+admin.site.site_header = "Medical Office Online Timecard Admin"
+admin.site.site_title = "Medical Office Online Timecard Admin Portal"
+admin.site.index_title = "Welcome to Medical Office Online Timecard Portal"

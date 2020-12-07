@@ -87,16 +87,14 @@
 </head>
 <div class="help-tip">
   <p>
-    <b>*Employee Choice:</b> This menu will allow you to select the employee, or employees that you want to view their report<br>
     <b>*Report Type:</b> This will allow you to view the report either in a web based view through the website, or in a downloadable .csv file that can be opened in excel<br>
     <b>*Start Date:</b> Use this widget to select the start of the time frame of the report<br>
     <b>*End Date:</b> Use this widget to select the end of the time frame of the report<br>
-    <b>*Generate Report:</b> Use this button to generate the report<br>
+    <b>*Submit:</b> Use this button to generate the report<br>
     <b>*Time Frame:</b> This drop down menu will allow you to select the time frame of the report, the time frames are 7 days, 14 days, 30 days, 90 days, and 180 days.<br>
     <b>*Note:</b> Reports do include the starting and ending times input (or current day if using prebuilt time periods).
     </p>
 </div>
-
 <h3>Use this form to choose a custom start and end date for time summary the report.</h3>
 <form method="post" id="form2">
 {% csrf_token %} {{ form2.as_p}}
@@ -124,5 +122,3 @@
 </form>
 
 {% endblock %}
-
-
