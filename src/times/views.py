@@ -1,4 +1,4 @@
-		from times.forms import timeForm, UserForm
+from times.forms import timeForm, UserForm
 from django.forms import HiddenInput, TimeInput, DateTimeInput
 from times.models import timeKeep
 from django.forms import modelformset_factory, model_to_dict
@@ -101,7 +101,7 @@ def timeEntry_view(request, *args, **kwargs):
 				messages.success(request, "you have successfully clocked out")
 				current.save()
 				if (current.out_time - current.in_time) > timedelta(hours = 8):
-					messages.error(request, "you have clocked in over eight hours, please talk to management to fix your time")
+					messages.success(request, "you have clocked in over eight hours, please talk to management to fix your time")
 				#print("autoout")
 			# else:
 			# 	return render(request, 'timeEntry.html', {'form' : currentReqForm})
