@@ -158,7 +158,7 @@ def timecheck(date):
        raise forms.ValidationError("you cannot clock in on a weekend")
     time_right_now = timezone.now()
     dater = date - time_right_now
-    if (dater).days < -1 or (dater).days > -1:
+    if (dater).days < -1 or (dater).days >= 0:
         raise forms.ValidationError("you can only clock in today")
     if date.hour < 5 or date.hour > 23:
         raise forms.ValidationError("you must clock in between 5 am and 11 pm")
