@@ -110,7 +110,7 @@ def timeEntry_view(request, *args, **kwargs):
 		return render(request, 'timeEntry.html', {'form' : currentReqForm})
 	else:
 		if not current:
-			current = timeKeep(user = request.user,dateTimeEntered = timezone.now().date())
+			current = timeKeep(user = request.user,dateTimeEntered = timezone.now())
 		form = timeForm(instance = current, user = request.user)
 	return render(request, 'timeEntry.html', {'form' : form})
 
@@ -161,6 +161,8 @@ def timeEdit_view(request, *args, **kwargs):
 					if form.has_changed() and form.is_valid():
 						user = form.cleaned_data['user']
 						dateTimeEntered = form.cleaned_data['dateTimeEntered']
+						weekNumberToday = dateTimeEntered.isocalendar()[1]
+						year = dateTimeEntered.isocalendar()[0]
 						currentFormTimeKeep = getTimeKeepFromKeys(user, 'Standard Time', dateTimeEntered, True)
 						currentFormTimeKeep.in_time = form.cleaned_data['in_time']
 						currentFormTimeKeep.lunchin_time = form.cleaned_data['lunchin_time']
@@ -169,6 +171,9 @@ def timeEdit_view(request, *args, **kwargs):
 						currentFormTimeKeep.save()
 						if currentFormTimeKeep.in_time is None:
 							currentFormTimeKeep.delete()
+				if weekNumberToday >= 2 and year > timezone.now().isocalendar()[0]:
+					weekNumberToday += 1
+				currentDayForms = createWeekFormSet(user,weekNumberToday, year)
 				return render(request, 'timeEdit.html', {'userformset': currentDayForms})
 			else:
 				userform = UserForm()
@@ -240,8 +245,6 @@ def createWeekFormSet(user, weekNumberToday, year):
 	#  	year += 1
 	#year, weekNumberToday, _ = datetimeEntered.isocalendar()
 	#datesToDisplay = [datetimeEntered + timedelta(days = i) for i in range(1, 6)]\\
-	print (year)
-	print (weekNumberToday)
 	datesToDisplay = [datetime.strptime(f'{year}-W{weekNumberToday - 1}-{i}', "%Y-W%W-%w") for i in range (1,6)]
 	formsetInitParams = []
 	for date in datesToDisplay:
