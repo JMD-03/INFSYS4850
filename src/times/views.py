@@ -32,7 +32,7 @@ def timeEntry_view(request, *args, **kwargs):
 					in_time = currentReqForm.cleaned_data['in_time']
 					inCurrent = getTimeKeepFromKeys(request.user,'Standard Time', in_time, True)
 					inCurrent.in_time = in_time
-					inCurrent.dateTimeEntered = in_time.date()
+					inCurrent.dateTimeEntered = in_time
 					#inCurrent.week_number = in_time.isocalendar().week
 					inCurrent.clocked_in = True
 					inCurrent.is_Manual = True
@@ -43,7 +43,7 @@ def timeEntry_view(request, *args, **kwargs):
 					lunchin_time = currentReqForm.cleaned_data['lunchin_time']
 					inCurrent = getTimeKeepFromKeys(request.user,'Standard Time', lunchin_time, True)
 					inCurrent.lunchin_time = lunchin_time
-					inCurrent.dateTimeEntered = lunchin_time.date()
+					inCurrent.dateTimeEntered = lunchin_time
 					#inCurrent.week_number = lunchin_time.isocalendar().week
 					inCurrent.clocked_in = False
 					inCurrent.is_Manual = True
@@ -53,7 +53,7 @@ def timeEntry_view(request, *args, **kwargs):
 					lunchout_time = currentReqForm.cleaned_data['lunchout_time']
 					inCurrent = getTimeKeepFromKeys(request.user, 'Standard Time',lunchout_time, True)
 					inCurrent.lunchout_time = lunchout_time
-					inCurrent.dateTimeEntered = lunchout_time.date()
+					inCurrent.dateTimeEntered = lunchout_time
 					#inCurrent.week_number = lunchout_time.isocalendar().week
 					inCurrent.clocked_in = True
 					inCurrent.is_Manual = True
@@ -63,7 +63,7 @@ def timeEntry_view(request, *args, **kwargs):
 					out_time = currentReqForm.cleaned_data['out_time']
 					inCurrent = getTimeKeepFromKeys(request.user,'Standard Time', out_time, True)
 					inCurrent.out_time = out_time
-					inCurrent.dateTimeEntered = out_time.date()
+					inCurrent.dateTimeEntered = out_time
 					#inCurrent.week_number = out_time.isocalendar().week
 					inCurrent.clocked_in = False
 					inCurrent.is_Manual = True
@@ -76,27 +76,27 @@ def timeEntry_view(request, *args, **kwargs):
 		if 'autoIn' in request.POST or 'lunchIn' in request.POST or 'lunchOut' in request.POST or 'autoOut' in request.POST:
 			if 'autoIn' in request.POST:
 				current.in_time = date
-				current.dateTimeEntered = date.date()
+				current.dateTimeEntered = date - timedelta(hours = 6)
 				current.clocked_in = True
-				leave_time = current.in_time + timedelta(hours = 8)
+				leave_time = current.in_time + timedelta(hours = 2)
 				messages.success(request, "you have successfully clocked in, clock out time must be %s" %leave_time)
 				print("autoin")
 				current.save()
 			elif 'lunchIn' in request.POST:
 				current.lunchin_time = date
-				current.dateTimeEntered = date.date()
+				current.dateTimeEntered = date - timedelta(hours=6)
 				current.clocked_in = False
 				messages.success(request, "you have successfully clocked in for lunch")
 				current.save()
 			elif 'lunchOut' in request.POST:
 				current.lunchout_time = date
-				current.dateTimeEntered = date.date()
+				current.dateTimeEntered = date - timedelta(hours=6)
 				current.clocked_in = True
 				messages.success(request, "you have successfully clocked out for lunch")
 				current.save()
 			elif 'autoOut' in request.POST:
 				current.out_time = date
-				current.dateTimeEntered = date.date()
+				current.dateTimeEntered = date - timedelta(hours=6)
 				current.clocked_in = False
 				messages.success(request, "you have successfully clocked out")
 				current.save()
@@ -119,7 +119,7 @@ def getTimeKeepFromKeys(user, timeType, date, create = False):
 		return timeKeep.objects.filter(user = user, timeType = timeType).get(dateTimeEntered = date)
 	except timeKeep.DoesNotExist:
 		if create:
-			return timeKeep.objects.create(user = user, timeType = timeType, dateTimeEntered = date)
+			return timeKeep.objects.create(user = user, timeType = timeType, dateTimeEntered = date.date())
 	except timeKeep.MultipleObjectsReturned:
 		return "MultiObj"
 	return None
@@ -239,7 +239,9 @@ def createWeekFormSet(user, weekNumberToday, year):
 	#  	weekNumberToday = 1
 	#  	year += 1
 	#year, weekNumberToday, _ = datetimeEntered.isocalendar()
-	#datesToDisplay = [datetimeEntered + timedelta(days = i) for i in range(1, 6)]
+	#datesToDisplay = [datetimeEntered + timedelta(days = i) for i in range(1, 6)]\\
+	print (year)
+	print (weekNumberToday)
 	datesToDisplay = [datetime.strptime(f'{year}-W{weekNumberToday - 1}-{i}', "%Y-W%W-%w") for i in range (1,6)]
 	formsetInitParams = []
 	for date in datesToDisplay:
