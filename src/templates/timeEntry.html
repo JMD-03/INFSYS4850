@@ -105,20 +105,25 @@
         <input style="background-color: dodgerblue; color: white;" type="submit" name="autoIn" class = "btn btn-primary" value = "Auto Clock In"{% if not form.clocked_in.value and form.in_time.value == None %}enabled{%else%}disabled{% endif %}/>
 
 
-        <input style="background-color: dodgerblue; color: white;" type="submit" name="lunchIn" class = "btn btn-primary" value = "Auto Lunch Clock In"{% if form.clocked_in.value == True and form.in_time.value != None and form.lunchin_time.value == None%}enabled{%else%}disabled{% endif %}/>
+        <input style="background-color: dodgerblue; color: white;" type="submit" name="lunchIn" class = "btn btn-primary" value = "Auto Lunch Start"{% if form.clocked_in.value == True and form.in_time.value != None and form.lunchin_time.value == None%}enabled{%else%}disabled{% endif %}/>
 
-        <input style="background-color: dodgerblue; color: white;" type="submit" name="lunchOut" class = "btn btn-primary" value = "Auto Lunch Clock Out"{% if not form.clocked_in.value == True and form.lunchin_time.value != None and form.lunchout_time.value == None %}enabled{%else%}disabled{% endif %}/>
+        <input style="background-color: dodgerblue; color: white;" type="submit" name="lunchOut" class = "btn btn-primary" value = "Auto Lunch End"{% if not form.clocked_in.value == True and form.lunchin_time.value != None and form.lunchout_time.value == None %}enabled{%else%}disabled{% endif %}/>
 
         <input style="background-color: dodgerblue; color: white;" type="submit" name="autoOut" class = "btn btn-primary" value = "Auto Clock Out"{% if form.clocked_in.value == True and form.in_time.value != None and form.out_time.value == None %}enabled{%else%}disabled{% endif %}/>
         <br><br><br>
     {% endif %}
-    {{form.as_p}}
-    <h2>Use for manually entering time.</h2>
-    <p>Note: This will flag your entry as manual.</p>
+    <br>
+    <br>
+    <h2>Or use this form for manually entering time</h2>
+    <p>In time: {{form.in_time}}</p>
+    <p>Lunch start: {{form.lunchin_time}}</p>
+    <p>Lunch end: {{form.lunchin_time}}</p>
+    <p>Out time: {{form.out_time}}<p>
+    {{form.dateTimeEntered.as_hidden}}
+    <button style="background-color: dodgerblue; color: white;" type="submit" name="manual">Manual Clock In/Out</button>
+        <p>Note: This will flag your entry as manual.</p>
     <p>This should be used as a backup to the auto entry buttons above.</p>
     <br>
-    <button style="background-color: dodgerblue; color: white;" type="submit" name="manual">Manual Clock In/Out</button>
-
 </form>
 {% if messages %}
     {% for message in messages %}
