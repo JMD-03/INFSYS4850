@@ -37,7 +37,7 @@ def timeEntry_view(request, *args, **kwargs):
 					inCurrent.clocked_in = True
 					inCurrent.is_Manual = True
 					leave_time = in_time + timedelta(hours = 8)
-					messages.success(request, "you have successfully clocked in, clock out time must be %s" %leave_time)
+					messages.success(request, "you have successfully clocked in, clock out time must be %s" %datetime.strftime(leave_time, '%d/%m/%Y %H:%M'))
 					inCurrent.save()
 				if 'lunchin_time' in currentReqForm.changed_data:
 					lunchin_time = currentReqForm.cleaned_data['lunchin_time']
@@ -79,7 +79,7 @@ def timeEntry_view(request, *args, **kwargs):
 				current.dateTimeEntered = date - timedelta(hours = 6)
 				current.clocked_in = True
 				leave_time = current.in_time + timedelta(hours = 2)
-				messages.success(request, "you have successfully clocked in, clock out time must be %s" %leave_time)
+				messages.success(request, "you have successfully clocked in, clock out time must be %s" %datetime.strftime(leave_time, '%d/%m/%Y %H:%M'))
 				print("autoin")
 				current.save()
 			elif 'lunchIn' in request.POST:
