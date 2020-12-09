@@ -80,7 +80,27 @@ class profileAdmin(admin.ModelAdmin):
         return True
 
     def has_delete_permission(self, request, obj=None):
-        return False
+        if request.user.is_superuser == True:
+            def get_queryset(self, request):
+                qs = super().get_queryset(request)
+                return qs
+            x = request.META['PATH_INFO']
+            try:
+                days_sub = timedelta(days=30)
+                y = int(re.search(r'\d+', x).group())
+                user = User.objects.get(id=y)
+                if user.is_active == True:
+                    return False
+                elif user.last_login == None:
+                    return True
+                elif (user.last_login > now() - days_sub):
+                    return False
+                else:
+                    return True
+            except:
+                return False
+        else:
+            return False
 
 admin.site.unregister(User)
 admin.site.register(User, CustomUserAdmin)

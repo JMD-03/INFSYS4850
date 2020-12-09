@@ -15,8 +15,8 @@ class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     PTO_Hours = models.FloatField(default=0, max_length=3, validators=[MinValueValidator(0), MaxValueValidator(200)])
     Sick_Hours = models.FloatField(default=0, max_length=3, validators=[MinValueValidator(0), MaxValueValidator(200)])
-    PTO_Accrual_Rate = models.FloatField(default=0, max_length=3)
-    Sick_Accrual_Rate = models.FloatField(default=0, max_length=3)
+    PTO_Accrual_Rate = models.FloatField(default=0, max_length=3, validators=[MinValueValidator(0), MaxValueValidator(200)])
+    Sick_Accrual_Rate = models.FloatField(default=0, max_length=3,  validators=[MinValueValidator(0), MaxValueValidator(200)])
 
     def __str__(self):
         return self.user.first_name + " " + self.user.last_name
@@ -118,7 +118,9 @@ class Request(models.Model):
         req_type = self.request_Type
         start_date_time = self.start_Date_Time
         end_date_time = self.end_Date_Time
+        print("in clean")
         if ((self.status == "Approved") and (req_type == "Paid Time Off" or req_type == "Sick Day")):
+            print("Status approved, req type is pto or sick time")
             prof = self.user.id
             prof = Profile.objects.get(user=prof)
             if req_type == "Paid Time Off":
@@ -193,12 +195,12 @@ class Request(models.Model):
                 raise ValidationError("You can't correct a future time.")
             if ((start_date_time.day != end_date_time.day) or (start_date_time.month != end_date_time.month) or (start_date_time.year != end_date_time.year)):
                 raise ValidationError("A time correction request must be put in for only a single day")
+        print("made it to the end of clean")
 
 
     def save(self, *args, **kwargs):
         status = self.status
         if status == "Requested":
-            print("status requested")
             pass #Do Nothing
         elif status == "Approved":
             req_type = self.request_Type
@@ -228,6 +230,7 @@ class Request(models.Model):
                             setDate = (str(in_time.year) + "-" + str(in_time.month) + "-" + str(in_time.day))
                         if start_date_time.day == end_date_time.day:
                             cursor.execute("INSERT into times_timekeep (in_time,lunchin_time,lunchout_time,out_time,clocked_in,user_id,timetype,dateTimeEntered, is_Manual) VALUES(%s, NULL, NULL, %s, 0, %s, %s, %s, 0)", [in_time, out_time, cur_user, req_type,setDate])
+                            minutes += ((end_date_time.hour*60)+end_date_time.minute) - ((start_date_time.hour*60) + start_date_time.minute)
                         else:
                             for i in range(calc_time.days + 1):
                                 day = start_date_time + timedelta(days=i)
@@ -245,7 +248,6 @@ class Request(models.Model):
                                     minutes += ((out_time.hour*60)+out_time.minute) - ((start_date_time.hour*60) + start_date_time.minute)
                                     out_time = out_time + hours_add
                                     cursor.execute("INSERT into times_timekeep (in_time,lunchin_time,lunchout_time,out_time,clocked_in,user_id,timetype,dateTimeEntered, is_Manual) VALUES(%s, NULL, NULL, %s, 0, %s, %s, %s, 0)", [in_time, out_time, cur_user, req_type,setDate])
-
 
                     else:  #req type does equal time correction so it can only be a single day.
                         if len(str(in_time.day)) == 1:
