@@ -1,10 +1,10 @@
 from django.shortcuts import render, HttpResponse
-from django.contrib.auth.decorators import login_required, permission_required
+from django.contrib.auth.decorators import login_required#, permission_required
 from .forms import ReportForm,ReportselfForm, ReportTimePull, ReportUserForm, ReportselfUserForm, ReportTimeUserPull
 from django.db import connection
-from django.utils.timezone import datetime, timedelta, now
-from django.utils import timezone, dateformat
-from times.models import timeKeep
+from django.utils.timezone import datetime#, timedelta, now
+# from django.utils import timezone, dateformat
+# from times.models import timeKeep
 
 @login_required
 def reports_view(request, *args, **kwargs):
@@ -28,7 +28,7 @@ def reports_view(request, *args, **kwargs):
                             row += ("<th>Employee Name</th><th>Time Type</th><th>Total Hours Logged</th><th>Number of Time Entries" ,)
                         else:
                             row += ("Employee Name, ", " Time Type, ", " Total Hours Logged, "," Number of Time Entries ","\n")
-                        cursor.execute("select concat(au.first_name, ' ', au.last_name), tt.timeType, CASE when tt.lunchin_time IS NULL AND tt.lunchout_time IS NULL THEN sum(TRUNCATE((timestampdiff(MINUTE, in_time, out_time)/60),2)) ELSE sum(TRUNCATE((timestampdiff(MINUTE, in_time, out_time)/60),2) - TRUNCATE((timestampdiff(MINUTE, tt.lunchin_time, tt.lunchout_time)/60),2)) END, count(timeType) FROM times_timekeep tt JOIN auth_user au ON au.id = tt.user_id WHERE tt.in_time BETWEEN DATE_ADD(DATE_SUB(curdate(), INTERVAL %s DAY), INTERVAL 6 HOUR) AND date_add(curdate(), INTERVAL 30 HOUR) AND tt.user_id LIKE %s GROUP BY 1, 2", [time, user_id])
+                        cursor.execute("select concat(au.first_name, ' ', au.last_name), tt.timeType,sum(IF(lunchin_time IS NULL AND lunchout_time IS NULL, TRUNCATE((timestampdiff(MINUTE, in_time, out_time)/60),2), TRUNCATE((timestampdiff(MINUTE, in_time, out_time)/60),2) - TRUNCATE((timestampdiff(MINUTE, tt.lunchin_time, tt.lunchout_time)/60),2))), count(timeType) FROM times_timekeep tt JOIN auth_user au ON au.id = tt.user_id WHERE tt.in_time BETWEEN DATE_ADD(DATE_SUB(curdate(), INTERVAL %s DAY), INTERVAL 6 HOUR) AND date_add(curdate(), INTERVAL 30 HOUR) AND tt.user_id LIKE %s GROUP BY 1, 2", [time, user_id])
                         if form.cleaned_data['report_Type'] == '1':
                             for rows in cursor.fetchall():
                                 row += ("<td>" + str(rows[0]) + "</td>" + "<td>" + str(rows[1]) + "</td>" + "<td>" + str(rows[2]) + "</td>" + "<td>" + str(rows[3]) + "</td>",)
@@ -124,7 +124,7 @@ def reports_view(request, *args, **kwargs):
                             row += ("<th>Employee Name</th><th>Time Type</th><th>Total Hours Logged</th><th>Number of Time Entries</th>", "\n")
                         else:
                             row += ("Employee Name, ", " Time Type, ", " Total Hours Logged, "," Number of Time Entries ", "\n")
-                        cursor.execute("select concat(au.first_name, ' ', au.last_name), tt.timeType, CASE when tt.lunchin_time IS NULL AND tt.lunchout_time IS NULL THEN sum(TRUNCATE((timestampdiff(MINUTE, in_time, out_time)/60),2)) ELSE sum(TRUNCATE((timestampdiff(MINUTE, in_time, out_time)/60),2) - TRUNCATE((timestampdiff(MINUTE, tt.lunchin_time, tt.lunchout_time)/60),2)) END, count(timeType) FROM times_timekeep tt JOIN auth_user au ON au.id = tt.user_id WHERE tt.in_time BETWEEN DATE_ADD(%s, INTERVAL 6 HOUR) AND DATE_ADD(%s, INTERVAL 30 HOUR) AND tt.user_id LIKE %s GROUP BY 1, 2", [start, end, user_id])
+                        cursor.execute("select concat(au.first_name, ' ', au.last_name), tt.timeType,sum(IF(lunchin_time IS NULL AND lunchout_time IS NULL, TRUNCATE((timestampdiff(MINUTE, in_time, out_time)/60),2), TRUNCATE((timestampdiff(MINUTE, in_time, out_time)/60),2) - TRUNCATE((timestampdiff(MINUTE, tt.lunchin_time, tt.lunchout_time)/60),2))), count(timeType) FROM times_timekeep tt, auth_user au WHERE au.id = tt.user_id AND tt.in_time BETWEEN DATE_ADD(DATE_SUB(curdate(), INTERVAL %s DAY), INTERVAL 6 HOUR) AND date_add(%s, INTERVAL 30 HOUR) AND tt.user_id LIKE %s GROUP BY 1,2", [start, end, user_id])
                         if form2.cleaned_data['report_Type'] == '1':
                             for rows in cursor.fetchall():
                                 row += ("<td>" + str(rows[0]) + "</td>" + "<td>" + str(rows[1]) + "</td>" + "<td>" + str(rows[2]) + "</td>" + "<td>" + str(rows[3]) + "</td>",  "\n")
@@ -151,7 +151,7 @@ def reports_view(request, *args, **kwargs):
                 response = HttpResponse(my_custom_sql(), content_type='application/text charset=utf-8')
                 response['Content-Disposition'] = 'attachment; filename="report.csv"'
             return response
-        
+
     else:
         form = ReportForm()
         form2 = ReportselfForm()
@@ -163,6 +163,7 @@ def reports_view(request, *args, **kwargs):
 
 
     ################## This view for employee to pull only their own time. ########################
+@login_required
 def reportsUser_view(request, *args, **kwargs):
     if request.method == 'POST':
         form = ReportUserForm(request.POST)
@@ -183,7 +184,7 @@ def reportsUser_view(request, *args, **kwargs):
                             row += ("<th>Employee Name</th><th>Time Type</th><th>Total Hours Logged</th><th>Number of Time Entries" ,)
                         else:
                             row += ("Employee Name, ", " Time Type, ", " Total Hours Logged, "," Number of Time Entries ","\n")
-                        cursor.execute("select concat(au.first_name, ' ', au.last_name), tt.timeType, CASE when tt.lunchin_time IS NULL AND tt.lunchout_time IS NULL THEN sum(TRUNCATE((timestampdiff(MINUTE, in_time, out_time)/60),2)) ELSE sum(TRUNCATE((timestampdiff(MINUTE, in_time, out_time)/60),2) - TRUNCATE((timestampdiff(MINUTE, tt.lunchin_time, tt.lunchout_time)/60),2)) END, count(timeType) FROM times_timekeep tt JOIN auth_user au ON au.id = tt.user_id WHERE tt.in_time BETWEEN DATE_ADD(DATE_SUB(curdate(), INTERVAL %s DAY), INTERVAL 6 HOUR) AND date_add(curdate(), INTERVAL 30 HOUR) AND tt.user_id = %s GROUP BY 1, 2", [time, user_id])
+                        cursor.execute("select concat(au.first_name, ' ', au.last_name), tt.timeType,sum(IF(lunchin_time IS NULL AND lunchout_time IS NULL, TRUNCATE((timestampdiff(MINUTE, in_time, out_time)/60),2), TRUNCATE((timestampdiff(MINUTE, in_time, out_time)/60),2) - TRUNCATE((timestampdiff(MINUTE, tt.lunchin_time, tt.lunchout_time)/60),2))), count(timeType) FROM times_timekeep tt JOIN auth_user au ON au.id = tt.user_id WHERE tt.in_time BETWEEN DATE_ADD(DATE_SUB(curdate(), INTERVAL %s DAY), INTERVAL 6 HOUR) AND date_add(curdate(), INTERVAL 30 HOUR) AND tt.user_id = %s GROUP BY 1, 2", [time, user_id])
                         if form.cleaned_data['report_Type'] == '1':
                             for rows in cursor.fetchall():
                                 row += ("<td>" + str(rows[0]) + "</td>" + "<td>" + str(rows[1]) + "</td>" + "<td>" + str(rows[2]) + "</td>" + "<td>" + str(rows[3]) + "</td>",)
@@ -222,7 +223,7 @@ def reportsUser_view(request, *args, **kwargs):
                 with connection.cursor() as cursor:
                     try:
                         row = ("Time Report Run At " + str(datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M')) + ".","\n")
-                        row += ("This report was run for the following dates: " + str(start) + " through " + str(end) + "." "\n")
+                        row += ("This report was run for the following dates: " + str(start) + " through " + str(end) + ".", "\n")
                         if form3.cleaned_data['report_Type'] == '1':
                             row += ("<th>Employee Name</th><th>Clocked In</th><th>Lunch Start</th><th>Lunch End</th><th>Clocked Out</th><th>Time Type</th><th>Manual Entry</th>", "\n")
                         else:
@@ -275,7 +276,7 @@ def reportsUser_view(request, *args, **kwargs):
                             row += ("<th>Employee Name</th><th>Time Type</th><th>Total Hours Logged</th><th>Number of Time Entries</th>", "\n")
                         else:
                             row += ("Employee Name, ", " Time Type, ", " Total Hours Logged, "," Number of Time Entries ", "\n")
-                        cursor.execute("select concat(au.first_name, ' ', au.last_name), tt.timeType, CASE when tt.lunchin_time IS NULL AND tt.lunchout_time IS NULL THEN sum(TRUNCATE((timestampdiff(MINUTE, in_time, out_time)/60),2)) ELSE sum(TRUNCATE((timestampdiff(MINUTE, in_time, out_time)/60),2) - TRUNCATE((timestampdiff(MINUTE, tt.lunchin_time, tt.lunchout_time)/60),2)) END, count(timeType) FROM times_timekeep tt JOIN auth_user au ON au.id = tt.user_id WHERE tt.in_time BETWEEN DATE_ADD(%s, INTERVAL 6 HOUR) AND DATE_ADD(%s, INTERVAL 30 HOUR) AND tt.user_id LIKE %s GROUP BY 1, 2", [start, end, user_id])
+                        cursor.execute("select concat(au.first_name, ' ', au.last_name), tt.timeType,sum(IF(lunchin_time IS NULL AND lunchout_time IS NULL, TRUNCATE((timestampdiff(MINUTE, in_time, out_time)/60),2), TRUNCATE((timestampdiff(MINUTE, in_time, out_time)/60),2) - TRUNCATE((timestampdiff(MINUTE, tt.lunchin_time, tt.lunchout_time)/60),2))), count(timeType) FROM times_timekeep tt JOIN auth_user au ON au.id = tt.user_id WHERE tt.in_time BETWEEN DATE_ADD(%s, INTERVAL 6 HOUR) AND DATE_ADD(%s, INTERVAL 30 HOUR) AND tt.user_id LIKE %s GROUP BY 1, 2", [start, end, user_id])
                         if form2.cleaned_data['report_Type'] == '1':
                             for rows in cursor.fetchall():
                                 row += ("<td>" + str(rows[0]) + "</td>" + "<td>" + str(rows[1]) + "</td>" + "<td>" + str(rows[2]) + "</td>" + "<td>" + str(rows[3]) + "</td>",  "\n")
@@ -302,9 +303,11 @@ def reportsUser_view(request, *args, **kwargs):
                 response = HttpResponse(my_custom_sql(), content_type='application/text charset=utf-8')
                 response['Content-Disposition'] = 'attachment; filename="report.csv"'
             return response
-        
+
     else:
         form = ReportUserForm()
         form2 = ReportselfUserForm()
         form3 = ReportTimeUserPull()
     return render(request, 'reports.html', {'form': form, 'form2': form2, 'form3': form3})
+
+

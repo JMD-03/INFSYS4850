@@ -1,41 +1,54 @@
-  
-{% extends "base.html" %} {% block content %} {% if form.errors %}
-<p>Your username and password didn't match. Please try again.</p>
-{% endif %} {% if next %} {% if user.is_authenticated %}
-<p>
-  Your account doesn't have access to this page. To proceed, please login with
-  an account that has access.
-</p>
-{% else %}
-<p>Please login to see this page.</p>
-{% endif %} {% endif %}
+{% extends "base.html" %} {% block content %} {% load static %}
 <head>
   <style>
     .login {
       text-align: center;
     }
+    body {
+        background-repeat:no-repeat;
+        background-size:100%;
   </style>
 </head>
+
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+
 <form method="post" action="{% url 'login' %}">
   {% csrf_token %}
-  <h1 style="text-align: center;">Medical Office Online Timekeeping System</h1>
+  <h1 style="text-align: center; text-shadow: 2px 2px 0px black; color: white;">Medical Office Online Timekeeping System</h1>
   <table class="login" align="center">
-    
+
     <tr>
-      <td>{{ form.username.label_tag }}</td>
-      <td>{{ form.username }}</td>
+      <td style="text-align: center; text-shadow: 2px 2px 0px black; color: white;">{{ form.username.label_tag }}</td>
+      <td style="text-align: center; text-shadow: 2px 2px 0px black; color: white;">{{ form.username }}</td>
     </tr>
     <tr>
-      <td>{{ form.password.label_tag }}</td>
-      <td>{{ form.password }}</td>
+      <td style="text-align: center; text-shadow: 2px 2px 0px black; color: white;">{{ form.password.label_tag }}</td>
+      <td style="text-align: center; text-shadow: 2px 2px 0px black; color: white;">{{ form.password }}</td>
     </tr>
   </table>
-  <div style="margin-left: 54.3%;">
-  <input type="submit" value="login" />
-  <input type="hidden" name="next" value="{{ next }}" />
+  <div style="position:absolute; left: 54.3%;" >
+    <input type="submit" value="login" />
+    <input type="hidden" name="next" value="{{ next }}" />
   </div>
 </form>
-
+<br>
+<br>
+{% if form.errors %}
+<p style="text-align: center; color: red;">Your username and password didn't match. Please try again.</p>
+{% endif %} {% if next %} {% if user.is_authenticated %}
+<p style="text-align: center; color: red;">
+  Your account doesn't have access to this page. To proceed, please login with
+  an account that has access.
+</p>
+{% else %}
+<p style="text-align: center; color: red;">Please login to see this page.</p>
+{% endif %} {% endif %}
 <!--  Assumes you setup the password_reset view in your URLconf 
 <p><a href="{% url 'password_reset' %}">Lost password?</a></p> -->
 

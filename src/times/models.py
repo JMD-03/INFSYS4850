@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from datetime import date, time
 import datetime
 from django.utils import timezone
+from django.utils.timezone import datetime, timedelta
 
 
 # Create your models here.
@@ -15,15 +16,15 @@ class timeKeep(models.Model):
 		Sick_Day = 'Sick Day'
 		Overtime = 'Overtime'
 		Standardtime = 'Standard Time'
-		
+
 
 	timeType = models.TextField(
 		choices=timeType.choices,
 		default=timeType.Standardtime
     )
 
-	in_time = models.DateTimeField(blank = True, null = True)	
-	
+	in_time = models.DateTimeField(blank = True, null = True)
+
 	lunchin_time = models.DateTimeField(blank = True, null = True)
 
 	lunchout_time = models.DateTimeField(blank = True, null = True)
@@ -31,7 +32,7 @@ class timeKeep(models.Model):
 	out_time = models.DateTimeField(blank = True, null = True)
 
 	clocked_in = models.BooleanField(default = False)
-	
+
 	is_Manual = models.BooleanField(default = False)
 
-	dateTimeEntered = models.DateField(default = None, null = True)
+	dateTimeEntered = models.DateField(default = (timezone.now() - timedelta(hours=6)), null = True)

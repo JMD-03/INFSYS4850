@@ -19,7 +19,7 @@ class ReportForm(forms.Form):
     )
     time_Frame = forms.ChoiceField(choices=times, required=True)
     employee = [("all", "All Employees")]
-    employee += [(i.user_id, i) for i in Profile.objects.all()]
+    employee += [(i.user_id, "Name: " + str(i) + ";  ID: " + str(i.user_id)) for i in Profile.objects.all()]
     employee_Choice = forms.ChoiceField(choices=employee, required=True)
     report_Type = forms.ChoiceField(choices=reports, required=True)
     
@@ -31,19 +31,14 @@ class DateInput(forms.DateInput):
     input_type = 'date'
 
 class ReportselfForm(forms.Form):
-    def clean(self, *args, **kwargs):
-        cleaned_data = super().clean()
-        start_date = cleaned_data.get("start_Date")
-        end_date = cleaned_data.get("end_Date")
-        if end_date < start_date:
-            raise forms.ValidationError("End date should be greater than start date.")
+
 
     reports = (
         (1, ("Web-Based Report")),
         (2, ("Downloadable Report"))
     )
     employee = [("all", "All Employees")]
-    employee += [(i.user_id, i) for i in Profile.objects.all()]
+    employee += [(i.user_id, "Name: " + str(i) + ";  ID: " + str(i.user_id)) for i in Profile.objects.all()]
     employee_Choice = forms.ChoiceField(choices=employee, required=True)
     report_Type = forms.ChoiceField(choices=reports, required=True)
     start_Date = forms.DateField(widget=DateInput)
@@ -54,21 +49,14 @@ class ReportselfForm(forms.Form):
 
 
 class ReportTimePull(forms.Form):
-    def clean(self, *args, **kwargs):
-        cleaned_data = super().clean()
-        start_date = cleaned_data.get("starting_Date")
-        end_date = cleaned_data.get("ending_Date")
-        print(end_date)
-        print(start_date)
-        if end_date < start_date:
-            raise forms.ValidationError("End date should be greater than start date.")
+
 
     reports = (
         (1, ("Web-Based Report")),
         (2, ("Downloadable Report"))
     )
     employee = [("all", "All Employees")]
-    employee += [(i.user_id, i) for i in Profile.objects.all()]
+    employee += [(i.user_id, "Name: " + str(i) + ";  ID: " + str(i.user_id)) for i in Profile.objects.all()]
     employee_Choice = forms.ChoiceField(choices=employee, required=True)
     report_Type = forms.ChoiceField(choices=reports, required=True)
     starting_Date = forms.DateField(widget=DateInput)
@@ -107,13 +95,6 @@ class ReportselfUserForm(forms.Form):
         self.user = kwargs.pop('user', None)
         super(ReportselfUserForm, self).__init__(*args, **kwargs)
 
-    def clean(self, *args, **kwargs):
-        cleaned_data = super().clean()
-        start_date = cleaned_data.get("start_Date")
-        end_date = cleaned_data.get("end_Date")
-        if end_date < start_date:
-            raise forms.ValidationError("End date should be greater than start date.")
-
     reports = (
         (1, ("Web-Based Report")),
         (2, ("Downloadable Report"))
@@ -131,13 +112,6 @@ class ReportTimeUserPull(forms.Form):
         self.user = kwargs.pop('user', None)
         super(ReportTimeUserPull, self).__init__(*args, **kwargs)
 
-    def clean(self, *args, **kwargs):
-        cleaned_data = super().clean()
-        start_date = cleaned_data.get("starting_Date")
-        end_date = cleaned_data.get("ending_Date")
-        if end_date < start_date:
-            raise forms.ValidationError("End date should be greater than start date.")
-
     reports = (
         (1, ("Web-Based Report")),
         (2, ("Downloadable Report"))
@@ -148,7 +122,3 @@ class ReportTimeUserPull(forms.Form):
 
     class Meta:
         fields: ('starting_Date','ending_Date','report_Type')
-
-
-
-

@@ -15,14 +15,14 @@ class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     PTO_Hours = models.FloatField(default=0, max_length=3, validators=[MinValueValidator(0), MaxValueValidator(200)])
     Sick_Hours = models.FloatField(default=0, max_length=3, validators=[MinValueValidator(0), MaxValueValidator(200)])
-    PTO_Accrual_Rate = models.FloatField(default=0, max_length=3)
-    Sick_Accrual_Rate = models.FloatField(default=0, max_length=3)
+    PTO_Accrual_Rate = models.FloatField(default=0, max_length=3, validators=[MinValueValidator(0), MaxValueValidator(200)])
+    Sick_Accrual_Rate = models.FloatField(default=0, max_length=3,  validators=[MinValueValidator(0), MaxValueValidator(200)])
 
     def __str__(self):
         return self.user.first_name + " " + self.user.last_name
 
     def save(self, *args, **kwargs):
-        
+
         try:
             prof = self.user.id
             prof = Profile.objects.get(user=prof)
@@ -101,6 +101,8 @@ class Request(models.Model):
         default=Request_Type.Paid_Time_Off
     )
 
+    submission_Date = models.DateTimeField(default=timezone.now())
+
     start_Date_Time = models.DateTimeField(default=None)
     end_Date_Time = models.DateTimeField(default=None)
 
@@ -113,7 +115,7 @@ class Request(models.Model):
         choices=cur_Status.choices,
         default=cur_Status.requested
     )
-    
+
     def clean(self, *args, **kwargs):
         req_type = self.request_Type
         start_date_time = self.start_Date_Time
@@ -133,9 +135,9 @@ class Request(models.Model):
                 raise ValidationError("Start and end time can not match.")
             calc_time = end_date_time - start_date_time
             seconds = calc_time.total_seconds()
-            minutes = seconds // 60      
+            minutes = seconds // 60
             remain_time = (minutes % 60) // 60
-            old_req = now() - start_date_time     
+            old_req = now() - start_date_time
             if (start_date_time.weekday() >= 5):
                 raise ValidationError("Your start or end date can not be a weekend.")
             if (end_date_time.weekday() >= 5):
@@ -147,11 +149,11 @@ class Request(models.Model):
             if (calc_time.days == 0 and start_date_time.day == end_date_time.day):         # Check if this is a single day request
                 day = start_date_time + timedelta(days=calc_time.days)
                 if (day.weekday() < 5):
-                    if (minutes/60) > 8:                                       
+                    if (minutes/60) > 8:
                         raise ValidationError("You can not request over 8 hours of time for a single day.")
                     elif (minutes + remain_time < 60):
                         raise ValidationError("Minimum request time is one hour.")
-                    elif (shours < minutes):                                         
+                    elif (shours < minutes):
                         raise ValidationError("You do not have enough banked time to cover this request 1.")
                 else:
                     raise ValidationError("Your are submitting a single day request for a weekend")
@@ -198,17 +200,16 @@ class Request(models.Model):
     def save(self, *args, **kwargs):
         status = self.status
         if status == "Requested":
-            print("status requested")
             pass #Do Nothing
         elif status == "Approved":
             req_type = self.request_Type
+            start_date_time = self.start_Date_Time
+            end_date_time = self.end_Date_Time
             if req_type == "Overtime":
                 total_days = 0
             if req_type == "Paid Time Off" or req_type == "Sick Day":
                 prof = self.user.id
                 prof = Profile.objects.get(user=prof)
-                start_date_time = self.start_Date_Time
-                end_date_time = self.end_Date_Time
                 calc_time = end_date_time - start_date_time
 
             with connection.cursor() as cursor:
@@ -228,6 +229,8 @@ class Request(models.Model):
                             setDate = (str(in_time.year) + "-" + str(in_time.month) + "-" + str(in_time.day))
                         if start_date_time.day == end_date_time.day:
                             cursor.execute("INSERT into times_timekeep (in_time,lunchin_time,lunchout_time,out_time,clocked_in,user_id,timetype,dateTimeEntered, is_Manual) VALUES(%s, NULL, NULL, %s, 0, %s, %s, %s, 0)", [in_time, out_time, cur_user, req_type,setDate])
+                            if req_type == "Paid Time Off" or req_type == "Sick Day":
+                                minutes += ((end_date_time.hour*60)+end_date_time.minute) - ((start_date_time.hour*60) + start_date_time.minute)
                         else:
                             for i in range(calc_time.days + 1):
                                 day = start_date_time + timedelta(days=i)
@@ -245,7 +248,6 @@ class Request(models.Model):
                                     minutes += ((out_time.hour*60)+out_time.minute) - ((start_date_time.hour*60) + start_date_time.minute)
                                     out_time = out_time + hours_add
                                     cursor.execute("INSERT into times_timekeep (in_time,lunchin_time,lunchout_time,out_time,clocked_in,user_id,timetype,dateTimeEntered, is_Manual) VALUES(%s, NULL, NULL, %s, 0, %s, %s, %s, 0)", [in_time, out_time, cur_user, req_type,setDate])
-
 
                     else:  #req type does equal time correction so it can only be a single day.
                         if len(str(in_time.day)) == 1:
