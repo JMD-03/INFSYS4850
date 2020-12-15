@@ -19,8 +19,8 @@ timeEditFormSet = modelformset_factory(timeKeep, form = timeForm, extra = 5, max
 formsetInitParams = []
 
 @login_required
-def timeEntry_view(request, *args, **kwargs):	
-	current = getTimeKeepFromKeys(request.user,'Standard Time', timezone.now())
+def timeEntry_view(request, *args, **kwargs):
+	current = getTimeKeepFromKeys(request.user,'Standard Time', timezone.now(), False)
 	if current == "MultiObj":
 		return HttpResponseServerError("Can't have more than one time entry per day, Please Contact Management/Supervisors. /n Hit the back button to go back")
 	if request.method == 'POST':
@@ -37,8 +37,13 @@ def timeEntry_view(request, *args, **kwargs):
 					inCurrent.clocked_in = True
 					inCurrent.is_Manual = True
 					leave_time = in_time + timedelta(hours = 8)
-					messages.success(request, "you have successfully clocked in, clock out time must be %s" %datetime.strftime(leave_time, '%d/%m/%Y %H:%M'))
-					inCurrent.save()
+					threepmchecker = (timezone.now() - timedelta(hours=6)).replace(hour=15, minute= 0, second= 0 , microsecond= 0)
+					if currentReqForm.is_valid():
+					    if in_time < threepmchecker:
+						    messages.success(request, "you have successfully clocked in, clock out time will be approximately %s not including a lunch" %datetime.strftime(leave_time, '%m/%d/%Y %H:%M'))
+					    else:
+						    messages.success(request, "you have successfully clocked in")
+					    inCurrent.save()
 				if 'lunchin_time' in currentReqForm.changed_data:
 					lunchin_time = currentReqForm.cleaned_data['lunchin_time']
 					inCurrent = getTimeKeepFromKeys(request.user,'Standard Time', lunchin_time, True)
@@ -47,8 +52,10 @@ def timeEntry_view(request, *args, **kwargs):
 					#inCurrent.week_number = lunchin_time.isocalendar().week
 					inCurrent.clocked_in = False
 					inCurrent.is_Manual = True
-					messages.success(request, "you have successfully clocked in for lunch")
-					inCurrent.save()
+					if currentReqForm.is_valid():
+					    messages.success(request, "you have successfully started your lunch")
+					    inCurrent.save()
+
 				if 'lunchout_time' in currentReqForm.changed_data:
 					lunchout_time = currentReqForm.cleaned_data['lunchout_time']
 					inCurrent = getTimeKeepFromKeys(request.user, 'Standard Time',lunchout_time, True)
@@ -57,8 +64,12 @@ def timeEntry_view(request, *args, **kwargs):
 					#inCurrent.week_number = lunchout_time.isocalendar().week
 					inCurrent.clocked_in = True
 					inCurrent.is_Manual = True
-					messages.success(request, "you have successfully clocked out for lunch")
-					inCurrent.save()
+					if currentReqForm.is_valid():
+					    messages.success(request, "you have successfully end your lunch")
+					    inCurrent.save()
+				# else:
+				#     timekeep = getTimeKeepFromKeys(request.user,'Standard Time', in_time, False)
+				#     timekeep.lunchout_time = None
 				if 'out_time' in currentReqForm.changed_data:
 					out_time = currentReqForm.cleaned_data['out_time']
 					inCurrent = getTimeKeepFromKeys(request.user,'Standard Time', out_time, True)
@@ -67,19 +78,23 @@ def timeEntry_view(request, *args, **kwargs):
 					#inCurrent.week_number = out_time.isocalendar().week
 					inCurrent.clocked_in = False
 					inCurrent.is_Manual = True
-					messages.success(request, "you have successfully clocked out")
-					inCurrent.save()
-		else:
-			# Error area
-			current = getTimeKeepFromKeys(request.user,'Standard Time', timezone.now(), True)
-		date = timezone.now()
+					if currentReqForm.is_valid():
+					    messages.success(request, "you have successfully clocked out")
+					    inCurrent.save()
+
 		if 'autoIn' in request.POST or 'lunchIn' in request.POST or 'lunchOut' in request.POST or 'autoOut' in request.POST:
+			current = getTimeKeepFromKeys(request.user,'Standard Time', timezone.now(), True)
+			date = timezone.now()
 			if 'autoIn' in request.POST:
 				current.in_time = date
 				current.dateTimeEntered = date - timedelta(hours = 6)
 				current.clocked_in = True
 				leave_time = current.in_time + timedelta(hours = 2)
-				messages.success(request, "you have successfully clocked in, clock out time must be %s" %datetime.strftime(leave_time, '%d/%m/%Y %H:%M'))
+				threepmchecker = (timezone.now() - timedelta(hours=6)).replace(hour=15, minute= 0, second= 0 , microsecond= 0)
+				if current.in_time < threepmchecker:
+					messages.success(request, "you have successfully clocked in, clock out time will be approximately %s not including a lunch" %datetime.strftime(leave_time, '%m/%d/%Y %H:%M'))
+				else:
+					messages.success(request, "you have successfully clocked in")
 				print("autoin")
 				current.save()
 			elif 'lunchIn' in request.POST:
@@ -164,11 +179,16 @@ def timeEdit_view(request, *args, **kwargs):
 						currentFormTimeKeep = getTimeKeepFromKeys(user, 'Standard Time', dateTimeEntered, True)
 						currentFormTimeKeep.in_time = form.cleaned_data['in_time']
 						currentFormTimeKeep.lunchin_time = form.cleaned_data['lunchin_time']
+						weekNumberToday = dateTimeEntered.isocalendar()[1]
+						year = dateTimeEntered.isocalendar()[0]
 						currentFormTimeKeep.lunchout_time = form.cleaned_data['lunchout_time']
 						currentFormTimeKeep.out_time = form.cleaned_data['out_time']
 						currentFormTimeKeep.save()
 						if currentFormTimeKeep.in_time is None:
 							currentFormTimeKeep.delete()
+				if weekNumberToday >= 2 and year > timezone.now().isocalendar()[0]:
+					weekNumberToday += 1
+				currentDayForms = createWeekFormSet(user,weekNumberToday, year)
 				return render(request, 'timeEdit.html', {'userformset': currentDayForms})
 			else:
 				userform = UserForm()

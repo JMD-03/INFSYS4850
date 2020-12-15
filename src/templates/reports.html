@@ -1,90 +1,5 @@
 {% extends 'base.html' %} {% block content %} {% include 'navbar.html' %}
-<head>
-  <style>
-      .help-tip{
-  position: absolute;
-  top: 80px;
-  right: 18px;
-  text-align: center;
-  background-color: #BCDBEA;
-  border-radius: 50%;
-  width: 24px;
-  height: 24px;
-  font-size: 14px;
-  line-height: 26px;
-  cursor: default;
-}
 
-.help-tip:before{
-  content:'?';
-  font-weight: bold;
-  color:#fff;
-}
-
-.help-tip:hover p{
-  display:block;
-  transform-origin: 100% 0%;
-
-  -webkit-animation: fadeIn 0.3s ease-in-out;
-  animation: fadeIn 0.3s ease-in-out;
-
-}
-
-.help-tip p{    /* The tooltip */
-  display: none;
-  text-align: left;
-  background-color: #1E2021;
-  padding: 20px;
-  width: 300px;
-  position: absolute;
-  border-radius: 3px;
-  box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.2);
-  right: -4px;
-  color: #FFF;
-  font-size: 13px;
-  line-height: 1.4;
-}
-
-.help-tip p:before{ /* The pointer of the tooltip */
-  position: absolute;
-  content: '';
-  width:0;
-  height: 0;
-  border:6px solid transparent;
-  border-bottom-color:#1E2021;
-  right:10px;
-  top:-12px;
-}
-
-.help-tip p:after{ /* Prevents the tooltip from being hidden */
-  width:100%;
-  height:40px;
-  content:'';
-  position: absolute;
-  top:-40px;
-  left:0;
-}
-
-/* CSS animation */
-
-@-webkit-keyframes fadeIn {
-  0% { 
-      opacity:0; 
-      transform: scale(0.6);
-  }
-
-  100% {
-      opacity:100%;
-      transform: scale(1);
-  }
-}
-
-@keyframes fadeIn {
-  0% { opacity:0; }
-  100% { opacity:100%; }
-}
-  </style>
-</head>
 <div class="help-tip">
   <p>
     <b>*Employee Choice:</b> This menu will allow you to select the employee, or employees that you want to view their report<br>
@@ -96,33 +11,32 @@
     <b>*Note:</b> Reports do include the starting and ending times input (or current day if using prebuilt time periods).
     </p>
 </div>
-
-<h3>Use this form to choose a custom start and end date for time summary the report.</h3>
+<div style = "position:absolute; left:10%">
+<h4>Custom Start and End Date Summary Report</h4>
 <form method="post" id="form2">
 {% csrf_token %} {{ form2.as_p}}
   <input class="btn mt-3 btn-primary" name="customSummary" value="Submit" type="submit"/>
-  {% comment %} <button type="submit" name='form2-submit'>Custom Date Summary Report</button> {% endcomment %}
 </form>
 <br>
-<br>
 
-<h3>Use this form to choose a predefined number of days for the time summary report.</h3>
+
+<h4>Predefined Time Summary Report</h4>
 <form method="post" id="form">
 {% csrf_token %} {{ form.as_p}}
-  {% comment %} <button type="submit" name='form-submit'>Pre-Defined Summary Report</button> {% endcomment %}
    <input class="btn mt-3 btn-primary" name="predefined" value="Submit" type="submit"/>
 </form>
 <br>
-<br>
-<br>
 
-<h3>Use this form to pull the actual time entries between the selected days.</h3>
+
+<h4>Individual Time Entry Report</h4>
 <form method="post" id="form3">
 {% csrf_token %} {{ form3.as_p}}
   <input class="btn mt-3 btn-primary" name="timeEntry" value="Submit" type="submit"/>
-  {% comment %} <button type="submit" name='form3.submit'>Generate Time Entry Report</button> {% endcomment %}
 </form>
-
+</div>
 {% endblock %}
+
+
+
 
 

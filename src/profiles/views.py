@@ -8,7 +8,6 @@ from django.contrib.auth.decorators import login_required, permission_required
 # Create your views here.
 
 @login_required
-@permission_required("pages.supervisor_view")
 def profileCreation_view(request, *args, **kwargs):
     if request.method == 'POST':
         form1 = UserForm(request.POST)

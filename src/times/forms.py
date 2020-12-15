@@ -27,14 +27,14 @@ class timeForm(forms.ModelForm):
                    'dateTimeEntered': forms.HiddenInput(),
                    'user': forms.HiddenInput()
                    }
-                   
+
         model = timeKeep
         fields = ["in_time", "lunchin_time", "lunchout_time", "out_time", "clocked_in", "dateTimeEntered"]
         labels = {
             "lunchin_time": "Lunch start",
             "lunchout_time": "Lunch end"
         }
-    
+
         #model function for manual time incase user goes out of bounds
     def clean(self):
         cleaned_data = super().clean()
@@ -45,14 +45,14 @@ class timeForm(forms.ModelForm):
         out_Time = cleaned_data.get("out_time")
         datetimeentered = cleaned_data.get("dateTimeEntered")
         #datetimeentered = datetimeentered - timedelta(hours = 6)
-        try: 
+        try:
             if user is None:
                 if in_Time:
                     datetimeentered = in_Time.date()
                     #timekeep = timeKeep.objects.filter(user = self.user, timeType = "Standard Time").get(dateTimeEntered = datetimeentered.date())
                 if lunchin_Time:
                     datetimeentered = lunchin_Time.date()
-                   # timekeep = timeKeep.objects.filter(user = self.user, timeType = "Standard Time").get(dateTimeEntered = datetimeentered.date())
+                    # timekeep = timeKeep.objects.filter(user = self.user, timeType = "Standard Time").get(dateTimeEntered = datetimeentered.date())
                 if lunchout_Time:
                     datetimeentered = lunchout_Time.date()
                     #timekeep = timeKeep.objects.filter(user = self.user, timeType = "Standard Time").get(dateTimeEntered = datetimeentered.date())
@@ -61,74 +61,78 @@ class timeForm(forms.ModelForm):
                     #timekeep = timeKeep.objects.filter(user = self.user, timeType = "Standard Time").get(dateTimeEntered = datetimeentered.date())
                 timekeep = timeKeep.objects.filter(user = self.user, timeType = "Standard Time").get(dateTimeEntered = datetimeentered)
             else:
-                timekeep = timeKeep.objects.filter(user = user, timeType = "Standard Time").get(dateTimeEntered = datetimeentered)
+                timekeep = timeKeep.objects.filter(user = user, timeType = "Standard Time").get(dateTimeEntered = in_Time)
             if timekeep.in_time:
-                in_Time2 = timekeep.in_time 
+                in_Time2 = timekeep.in_time
             if timekeep.lunchin_time:
                 lunchin_Time2 = timekeep.lunchin_time
-            if timekeep.lunchout_time: 
+            if timekeep.lunchout_time:
                 lunchout_Time2 = timekeep.lunchout_time
         except:
             pass
         if out_Time:
             if user is None:
                 timecheck(out_Time)
+                if 'in_Time2' not in locals() and in_Time is None:
+                    raise forms.ValidationError("you cannot clock out without clocking in")
+                if 'in_Time2' in locals() and in_Time is None:
+                    if out_Time < in_Time2:
+                        raise forms.ValidationError("your clock out time should be greater than your saved clock in.")
+                    if (out_Time - in_Time2).total_seconds() > 29700:
+                        raise forms.ValidationError("you cannot clock in over eight hours")
+                if 'lunchout_Time2' in locals() and lunchout_Time is None:
+                    if lunchout_Time2 and out_Time < lunchout_Time2:
+                        raise forms.ValidationError("Your clock out time should be greater than saved lunch ending time. Please update your lunch start and end times to be within the boundaries of your new start/end times.")
+                if 'lunchin_Time2' in locals() and lunchin_Time is None:
+                    if lunchin_Time2  and out_Time < lunchin_Time2:
+                        raise forms.ValidationError("Your clock out time should be greater than saved lunch start time. Please update your lunch start and end times to be within the boundaries of your new start/end times.")
+                if 'in_Time2' in locals() and 'lunchin_Time2' in locals() and 'lunchout_Time2' in locals() and in_Time is None and out_Time is None:
+                    if (out_Time - (lunchout_Time2 - lunchin_Time2) - in_Time2).total_seconds() > 29700:
+                        raise forms.ValidationError("cannot be clocked in for over eight hours")
+                if 'lunchin_Time2' in locals() and 'lunchout_Time2' not in locals() and not lunchout_Time:
+                    raise forms.ValidationError("you cannot end your lunch break without starting one")
+            if in_Time and lunchin_Time and lunchout_Time:
+                if (out_Time - (lunchout_Time - lunchin_Time) - in_Time).total_seconds() > 29700:
+                    raise forms.ValidationError("Your clock out time cannot be greater than eight hours")
             if lunchout_Time  and out_Time < lunchout_Time:
-                raise forms.ValidationError("Your clock out time should be greater than lunch clock out")
+                raise forms.ValidationError("Your clock out time should be greater than lunch end time")
             if lunchin_Time  and out_Time < lunchin_Time:
-                raise forms.ValidationError("Your clock out time should be greater than lunch clock in")
-            if in_Time:
+                raise forms.ValidationError("Your clock out time should be greater than lunch start time")
+            if in_Time and lunchin_Time is None or lunchout_Time is None:
                 if out_Time < in_Time:
-                    raise forms.ValidationError("Your clock out time should be greater than clock in")
+                    raise forms.ValidationError("Your clock out time should be greater than your clock in time")
+            if in_Time and not lunchin_Time and not lunchout_Time:
                 if (out_Time - in_Time).total_seconds() > 29700:
                     raise forms.ValidationError("Cannot be clocked in over eight hours")
-            if 'in_Time2' not in locals() and in_Time is None:
-                raise forms.ValidationError("you cannot clock out without clocking in")
-            if 'in_Time2' in locals(): 
-                if out_Time < in_Time2:
-                    raise forms.ValidationError("your clock out time should be greater than your saved clock in ")
-                if (out_Time - in_Time2).total_seconds() > 29700:
-                    raise forms.ValidationError("you cannot clock in over eight hours")
-            if 'lunchout_Time2' in locals():
-                if lunchout_Time2 and out_Time < lunchout_Time2:
-                    raise forms.ValidationError("Your clock out time should be greater than saved lunch clock out")
-            if 'lunchin_Time2' in locals():
-                if lunchin_Time2  and out_Time < lunchin_Time2:
-                    raise forms.ValidationError("Your out time should be greater than saved lunch clock in")
-            if 'in_Time2' in locals() and 'lunchin_Time2' in locals() and 'lunchout_Time2' in locals():
-                if (out_Time + (lunchout_Time2 - lunchin_Time2) - in_Time2).total_seconds() > 29700:
-                    raise forms.ValidationError("cannot be clocked in for over eight hours")
-            if 'lunchin_Time2' in locals() and 'lunchout_Time2' not in locals() and not lunchout_Time:
-                raise forms.ValidationError("you cannot end your lunch break without starting one")
             if in_Time and lunchin_Time and not lunchout_Time:
                 raise forms.ValidationError("you cannot end your lunch break without starting one")
         if lunchout_Time:
             if user is None:
                 timecheck(lunchout_Time)
+                if 'lunchin_Time2' not in locals() and lunchin_Time is None:
+                    raise forms.ValidationError("you cannout end a lunch without starting one")
+                if 'in_Time2' not in locals() and in_Time is None:
+                    raise forms.ValidationError("you cannot end a lunch without clocking in")
+                if 'lunchin_Time2' in locals() and lunchin_Time is None:
+                    if lunchout_Time < lunchin_Time2:
+                        raise forms.ValidationError("Your lunch end time should be greater than your saved lunch start")
+                if 'in_Time2' in locals() and in_Time == None and lunchout_Time < in_Time2: #and in_Time is None:
+                    raise forms.ValidationError("your lunch clock out time should be greater than your saved clock in")
             if lunchin_Time and lunchout_Time < lunchin_Time:
-                raise forms.ValidationError("Your lunch clock out time should be greater than lunch in out")
-            if 'lunchin_Time2' not in locals() and lunchin_Time is None:
-                raise forms.ValidationError("you cannout lunch clock out without lunch clocking in")
-            if 'in_Time2' not in locals() and in_Time is None:
-                raise forms.ValidationError("you cannot lunch clock out without clocking in")
-            if 'lunchin_Time2' in locals(): 
-                if lunchout_Time < lunchin_Time2:
-                    raise forms.ValidationError("Your lunch clock out time should be greater than saved lunch in out")
-                if (lunchout_Time - lunchin_Time2).total_seconds() > 2100:
-                    raise forms.ValidationError("your lunch out time cannot be over 30 minutes")
+                raise forms.ValidationError("Your lunch end time should be greater than your lunch start")
             if in_Time and lunchout_Time < in_Time:
-                raise forms.ValidationError("Your lunch clock out time should be greater than clock in")
-            if 'in_Time2' in locals() and lunchout_Time < in_Time2:
-                raise forms.ValidationError("your lunch clock out time should be greater than your saved clock in ")
+                raise forms.ValidationError("Your lunch end time should be greater than your clock in time")
+
         if lunchin_Time:
             if user is None:
                 timecheck(lunchin_Time)
+                if 'in_Time2' not in locals() and in_Time is None:
+                    raise forms.ValidationError("you cannot start lunch without clocking in")
+                if 'in_Time2' in locals() and in_Time == None and lunchin_Time < in_Time2: #and in_Time is None:
+                    raise forms.ValidationError("your lunch start time should be greater than your saved clock in")
             if in_Time and lunchin_Time < in_Time:
-                raise forms.ValidationError("Your lunch clock in time should be greater than clock in")
-            if 'in_Time2' not in locals() and in_Time is None:
-                raise forms.ValidationError("you cannot lunchin without clocking in")
-            if 'in_Time2' in locals() and lunchin_Time < in_Time2:
-                raise forms.ValidationError("your lunch clock in time should be greater than your saved clock in ")
+                raise forms.ValidationError("Your lunch start time should be greater than your current clock in")
+
         if in_Time:
             if user is None:
                 timecheck(in_Time)
@@ -137,18 +141,21 @@ class timeForm(forms.ModelForm):
                 raise forms.ValidationError("cannot have nothing filled in")
         return cleaned_data
 
+
+
 def timecheck(date):
     if date.weekday() == 5 or date.weekday() == 6:
-       raise forms.ValidationError("you cannot clock in on a weekend")
+        raise forms.ValidationError("you cannot clock in on a weekend")
     time_right_now = timezone.now()
-    dater = date - time_right_now
-    if (dater).days < -1 or (dater).days >= 0:
-        raise forms.ValidationError("you can only clock in today")
-    if date.hour < 5 or date.hour > 23:
+    dater = timedelta(hours=6)
+    tzNOW = timezone.now() - timedelta(hours=6)
+    if date.day != tzNOW.day:
+        raise forms.ValidationError("you can only clock in today" + "date.day: " + str(date.day) + "timezone.now: " + str(timezone.now()))
+    if date.hour <= 5 or date.hour >= 23:
         raise forms.ValidationError("you must clock in between 5 am and 11 pm")
 
 
-        
+
 #form for entering user for timeEdit
 class UserForm(forms.ModelForm):
     class Meta: #used to create calander dropdown menus
